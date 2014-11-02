@@ -1,8 +1,5 @@
 *.class
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
 # Package Files #
 *.jar
 *.war
@@ -13,9 +10,12 @@ hs_err_pid*
 
 # Maven files
 target/
-
+dependency-reduced-pom.xml
 
 #Eclipse
 .settings
 .project
 .classpath
+
+#Deployment files
+.env

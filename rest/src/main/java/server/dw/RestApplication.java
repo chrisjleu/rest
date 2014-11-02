@@ -17,7 +17,7 @@ import core.config.AppConfiguration;
 public class RestApplication extends Application<RestApplicationConfiguration> {
 
     public static void main(String[] args) throws Exception {
-        new RestApplication().run(new String[] { "server", "server.yaml" });
+        new RestApplication().run(args);
     }
 
     @Override

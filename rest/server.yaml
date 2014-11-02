@@ -1,3 +1,13 @@
+# Server connection details
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+      type: http
+      bindHost: localhost
+      port: 8080
+
 # Logging settings.
 logging:
 
