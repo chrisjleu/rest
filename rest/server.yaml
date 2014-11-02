@@ -4,9 +4,8 @@ server:
   applicationContextPath: /
   adminContextPath: /admin
   connector:
-      type: http
-      bindHost: localhost
-      port: 8080
+    type: http
+    port: 8080
 
 # Logging settings.
 logging:

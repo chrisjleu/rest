@@ -1,31 +1,27 @@
 package core.config;
 
-import java.util.Arrays;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import core.integration.MongoDbConfiguration;
-import core.util.HostAndPort;
 
 @Configuration
 @ComponentScan(basePackages={"core"})
 public class AppConfiguration {
 
     @Bean
-    public MongoDbConfiguration mongoDbConfiguration() throws Exception {
-        MongoDbConfiguration mongoDbConfiguration = new MongoDbConfiguration();
-        mongoDbConfiguration.setCollName("messages");
-        mongoDbConfiguration.setDbName("mydb");
-        mongoDbConfiguration.setServerAddresses(Arrays.asList(mongoLocalhost()));
-        
-        return mongoDbConfiguration;
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
     
+    @Value("${MONGOLAB_URI}")
+    private String mongoDbConnectionUri;
+    
     @Bean
-    public HostAndPort mongoLocalhost() {
-        return new HostAndPort("localhost", 27017);
+    public MongoDbConfiguration mongoDbConfiguration() throws Exception {
+        return new MongoDbConfiguration(mongoDbConnectionUri, "mydb", "messages");
     }
-
 }

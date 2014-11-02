@@ -1,21 +1,19 @@
 package core.integration;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
-
-import core.util.HostAndPort;
+import com.mongodb.MongoClientURI;
 
 /**
  * <p>
@@ -25,38 +23,66 @@ import core.util.HostAndPort;
 @Component
 public class MongoFactory {
 
+    Logger logger = LoggerFactory.getLogger(MongoFactory.class);
+
     /**
      * The configuration POJO needed in order to build a {@link MongoClient}.
      */
-    private final MongoDbConfiguration mongoConfig;
+    private MongoDbConfiguration mongoConfig;
 
     @Inject
     public MongoFactory(MongoDbConfiguration mongoDbConfiguration) {
         mongoConfig = mongoDbConfiguration;
     }
 
+    private static MongoClientURI mongoClientUri;
+
+    private String databaseName;
+
+    /**
+     * The <code>createMongoClient()</code> method gives access to a single {@link MongoClient} instance.
+     */
+    private static class MongoClientHolder {
+        private static final Logger logger = LoggerFactory.getLogger(MongoClientHolder.class);
+        private static final MongoClient INSTANCE = createMongoClient(mongoClientUri);
+
+        private static MongoClient createMongoClient(MongoClientURI uri) {
+            try {
+                MongoClient client = new MongoClient(uri);
+                logger.info("Created MongoClient connected to \"{}\"", uri);
+                return client;
+            } catch (final Exception e) {
+                throw new Error(e);
+            }
+        }
+    }
+    
     /**
      * The mongo API documentation for <a href="https://api.mongodb.org/java/current/com/mongodb/MongoClient.html">
      * MongoClient</a> states that there should only be one object per JVM, so this property is only set once.
      */
     private MongoClient mongoClient;
 
-
+    
     /**
-     * Builds the MongoClient from a set of connections specified in the configuration file.
+     * Gathers the configuration necessary to construct a {@link MongoClient}. The client itself is not created until it
+     * is requested.
      * 
      * @return A Mongo API {@code MongoClient} object.
      * @throws {@link UnknownHostException} Thrown if the server can not be found.
      */
     @PostConstruct
-    public void buildClient() throws UnknownHostException {
-        List<HostAndPort> hosts = mongoConfig.getServerAddresses();
-        List<ServerAddress> serverAddresses = new ArrayList<>(hosts.size());
-        for (HostAndPort hostAndPort : hosts) {
-            serverAddresses.add(new ServerAddress(hostAndPort.getHost(), hostAndPort.getPort()));
+    public void configure() throws UnknownHostException {
+        mongoClientUri = new MongoClientURI(mongoConfig.getMongoClientUri());
+        logger.info("Mongo URI is \"{}\"", mongoClientUri);
+
+        // Get the database
+        databaseName = mongoClientUri.getDatabase();
+        if (databaseName == null) {
+            databaseName = mongoConfig.getDbName();
         }
 
-        this.mongoClient = new MongoClient(serverAddresses);
+        logger.info("The name of the database is \"{}\"", databaseName);
     }
 
     /**
@@ -64,20 +90,27 @@ public class MongoFactory {
      */
     @PreDestroy
     public void closeClient() {
-        mongoClient.close();
+        if (mongoClient != null)
+            mongoClient.close();
     }
 
     /**
      * Gets the instance of the {@link MongoClient} - there is only one.
      * 
      * @return The {@link MongoClient} instance of which there is only one per factory.
+     * @throws Exception
+     *             Thrown if the client could not establish a connection to the database.
      */
-    public MongoClient instance() {
-        return mongoClient;
+    public MongoClient instance() throws Exception {
+        MongoClient client = MongoClientHolder.INSTANCE;
+        if(logger.isDebugEnabled()) {
+            logger.debug("Returning client instance \"{}\": \"{}\"", client.hashCode(), client);
+        }
+        return client;
     }
 
     /**
-     * Builds a Mongo {@code DB} object from connection and db info set in a configuration file.
+     * Builds a Mongo {@code DB} object.
      * 
      * @return A Mongo Java API {@code DB} object.
      * @throws Exception
@@ -85,15 +118,15 @@ public class MongoFactory {
      * @throws {@link com.eeb.dropwizardmongo.exceptions.NullDBNameException} Throw in the db name is null.
      */
     public DB buildDB() throws Exception {
-        if (mongoConfig.getDbName() == null)
+        if (databaseName == null)
             throw new Exception("DB name is null");
 
-        return mongoClient.getDB(mongoConfig.getDbName());
+        return instance().getDB(databaseName);
     }
 
     /**
-     * Builds a Mongo {@code DBCollection} object from connection, db, and collection information set in a configuration
-     * file.
+     * Gets a the collection with a name configured in {@link MongoDbConfiguration}. If the collection does not exist, a
+     * new collection is created.
      * 
      * @return A Mongo Java API {@code DBCollection} object.
      * @throws {@link UnknownHostException} Thrown if the server can not be found.
@@ -101,14 +134,20 @@ public class MongoFactory {
      * @throws {@link NullCollectionNameException} Thrown if the collection name is null.
      */
     public DBCollection buildColl() throws Exception {
-        if (mongoConfig.getDbName() == null)
-            throw new Exception("DB name is null");
-
         if (mongoConfig.getCollName() == null)
-            throw new Exception("Collection name is null");
+            throw new Exception("Collection name has not been configured");
 
         final DB db = buildDB();
         return db.getCollection(mongoConfig.getCollName());
 
+    }
+
+    /**
+     * Gets the name of the database that the {@link MongoClient} generated by this factory operates on.
+     * 
+     * @return The name of the database that the {@link MongoClient} generated by this factory operates on.
+     */
+    public String getDatabaseName() {
+        return databaseName;
     }
 }

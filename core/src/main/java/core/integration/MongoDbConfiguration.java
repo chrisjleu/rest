@@ -1,56 +1,63 @@
 package core.integration;
 
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
 import com.mongodb.MongoClient;
 
-import core.util.HostAndPort;
-
 /**
  * <P>
- * All the information needed to create a {@link MongoClient} are stored here
+ * Encapsulates information needed to create a {@link MongoClient}.
  * </p>
  */
 public class MongoDbConfiguration {
 
     /**
-     * MongoDB locations.
+     * A URI in the format:
+     * 
+     * <pre>
+     * mongodb://host:port
+     * </pre>
      */
-    private List<HostAndPort> serverAddresses;
+    private String mongoClientUri;
 
     /**
-     * Optional name of the database. This property is required to use the dbBuild method.
+     * Optional name of the database.
      */
     private String dbName;
 
     /**
-     * Optional name of the collection to be set. The property is required to use the collBuild method.
+     * Optional name of the collection to be set.
      */
     private String collName;
 
-    // ////////////////// GETTERS AND SETTERS //////////////////////
-
-    public String getCollName() {
-        return collName;
+    /**
+     * The mongo client URI must be supplied but other values are optional.
+     * 
+     * @param mongoClientUri
+     *            A URI in the format: <code>mongodb://host:port</code>
+     * @param dbName
+     *            Optional name of the database.
+     * @param collName
+     *            Optional name of the collection to be set.
+     */
+    public MongoDbConfiguration(@NotNull String mongoClientUri, String dbName, String collName) {
+        this.mongoClientUri = mongoClientUri;
+        this.dbName = dbName;
+        this.collName = collName;
     }
 
-    public void setCollName(String collName) {
-        this.collName = collName;
+    // ////////////////// GETTERS AND SETTERS //////////////////////
+
+    public String getMongoClientUri() {
+        return mongoClientUri;
     }
 
     public String getDbName() {
         return dbName;
     }
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
+    public String getCollName() {
+        return collName;
     }
 
-    public List<HostAndPort> getServerAddresses() {
-        return serverAddresses;
-    }
-
-    public void setServerAddresses(List<HostAndPort> serverAddresses) {
-        this.serverAddresses = serverAddresses;
-    }
 }
