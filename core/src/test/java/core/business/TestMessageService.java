@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,19 +40,25 @@ public class TestMessageService {
      * insert the message into the database.
      */
     @Test
-    public void testAddMessageReturnsCorrectIdOnInsertSuccess() {
+    public void test_that_correct_id_returned_when_a_message_is_added() {
 
         // Given the actual insertion of the message to the DB (done via a JacksonDBCollection) is mocked...
-        Message message = new Message("This is a message");
-        when(messageCollection.insert(message)).thenReturn(result);
-        when(messageCollection.insert(message).getSavedId()).thenReturn(message.getId());
+        Message incomingMessage = new Message("This is a message", 1.0, 1.0);
+        ObjectId objectId = ObjectId.get();
+        String id = objectId.toString();
+        
+        when(messageCollection.insert(incomingMessage)).thenReturn(result);
+        when(messageCollection.insert(incomingMessage).getSavedId()).thenReturn(id);
 
         // ...when making a call to add the message (to the database)...
-        String id = messageService.add(message);
+        Message savedMessage = messageService.add(incomingMessage);
 
         // ...then the correct id of the message should be returned.
-        assertNotNull(id);
-        assertThat(id, equalTo(message.getId()));
+        assertNotNull(savedMessage);
+        assertThat(savedMessage.getId(), equalTo(id));
+        assertThat(savedMessage.getLatidude(), equalTo(1.0));
+        assertThat(savedMessage.getLongitude(), equalTo(1.0));
+        assertThat(savedMessage.getCreationDate(), equalTo(objectId.getDate()));
     }
 
 }

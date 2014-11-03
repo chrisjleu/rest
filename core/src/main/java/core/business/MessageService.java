@@ -7,11 +7,14 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.bson.types.ObjectId;
 import org.mongojack.DBCursor;
 import org.mongojack.JacksonDBCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.mongodb.QueryBuilder;
 
 import core.integration.MongoFactory;
 import core.model.Message;
@@ -49,12 +52,32 @@ public class MessageService {
     }
 
     /**
+     * Add the given {@link Message} to the database.
+     * 
+     * @param message
+     * @return The id of the message as stored in the database.
+     */
+    public Message add(@Valid Message message) {
+        logger.debug("Inserting {}", message);
+
+        String generatedId = messageColl.insert(message).getSavedId();
+        message.setId(generatedId);
+
+        return enhanceMessage(message);
+    }
+
+    public void dropCollection() {
+        logger.warn("Dropping collection \"{}\"", messageColl.getName());
+        messageColl.drop();
+    }
+
+    /**
      * Counts the number of messages in the repository.
      * 
      * @return
      */
-    public int count() {
-        return messageColl.find().count();
+    public long count() {
+        return messageColl.getCount();
     }
 
     /**
@@ -64,28 +87,35 @@ public class MessageService {
      */
     public List<Message> all() {
         DBCursor<Message> dbCursor = messageColl.find().limit(100);
+        return toMessageList(dbCursor);
+    }
+
+    /**
+     * Returns all messages from a point within a radius.
+     * 
+     * @return
+     */
+    public List<Message> allInRange(double ln, double lt, double maxDistance) {
+        DBCursor<Message> dbCursor = messageColl.find(QueryBuilder.start().nearSphere(ln, lt, maxDistance).get());
+        return toMessageList(dbCursor);
+    }
+
+    private List<Message> toMessageList(DBCursor<Message> dbCursor) {
         List<Message> messages = new ArrayList<Message>();
         while (dbCursor.hasNext()) {
             Message message = dbCursor.next();
-            messages.add(message);
+            messages.add(enhanceMessage(message));
         }
         return messages;
     }
 
     /**
-     * Add the given {@link Message} to the database.
-     * 
-     * @param message
-     * @return The id of the message as stored in the database.
+     * Adds any other fields that need to be processed to the message.
      */
-    public String add(@Valid Message message) {
-        logger.debug("Adding {}", message);
-        return messageColl.insert(message).getSavedId();
-    }
-
-    public void dropCollection() {
-        logger.warn("Dropping collection \"{}\"", messageColl.getName());
-        messageColl.drop();
+    private Message enhanceMessage(Message message) {
+        ObjectId mongoId = new ObjectId(message.getId());
+        message.setCreationDate(mongoId.getDate());
+        return message;
     }
 
 }

@@ -18,3 +18,4 @@ logging:
 
     # Overrides the level of server.dw to DEBUG.
     "server.dw.resource.MessageResource": DEBUG
+    "core.business.MessageService": DEBUG

@@ -31,7 +31,9 @@ import core.business.MessageService;
  * href="https://dropwizard.github.io/dropwizard/manual/core.html#man-core-representations">representations</a> of the
  * resource being requested (in the case of DropWiard, it's likely to be a JSON representation of the object).
  * </p>
- * <p>Resources related to messages.</p>
+ * <p>
+ * Resources related to messages.
+ * </p>
  */
 @Path("/m")
 @Produces(value = MediaType.APPLICATION_JSON)
@@ -41,17 +43,16 @@ public class MessageResource {
     Logger logger = LoggerFactory.getLogger(MessageResource.class);
 
     private final MessageService messageService;
-    
+
     public MessageResource(MessageService messageService) {
         this.messageService = messageService;
     }
 
-    
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
     @Timed
     @Path("/count")
-    public int count() {
+    public long count() {
         return messageService.count();
     }
 
@@ -62,11 +63,21 @@ public class MessageResource {
         List<core.model.Message> coreMessages = messageService.all();
         List<Message> messages = new ArrayList<>();
         for (core.model.Message message : coreMessages) {
-            messages.add(new Message(message.getValue()));
+            messages.add(Message.fromModel(message));
         }
         return messages;
     }
 
+    /**
+     * Send for example:
+     * 
+     * <pre>
+     * curl -X POST -H "Content-Type: application/json" -d '{"v":"This is a message", "ln":1.0, "lt":1.0}' http://localhost:8080/m
+     * </pre>
+     * 
+     * @param message
+     * @return
+     */
     @POST
     @Timed
     public Response send(@Valid Message message) {
