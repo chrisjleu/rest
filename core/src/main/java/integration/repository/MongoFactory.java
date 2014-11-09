@@ -1,4 +1,4 @@
-package core.integration;
+package integration.repository;
 
 import java.net.UnknownHostException;
 

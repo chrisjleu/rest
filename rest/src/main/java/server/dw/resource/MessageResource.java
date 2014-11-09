@@ -89,7 +89,7 @@ public class MessageResource {
     @DELETE
     @Timed
     public Response dropCollection() {
-        messageService.dropCollection();
+        messageService.dropAll();
         return Response.noContent().build();
     }
 

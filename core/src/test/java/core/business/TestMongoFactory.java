@@ -4,6 +4,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import integration.repository.MongoDbConfiguration;
+import integration.repository.MongoFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,9 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import core.integration.MongoDbConfiguration;
-import core.integration.MongoFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestMongoFactory {
