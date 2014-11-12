@@ -1,4 +1,4 @@
-package core.business;
+package core.service;
 
 import integration.api.repository.Repository;
 

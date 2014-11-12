@@ -17,7 +17,7 @@ import core.model.Message;
 import core.model.User;
 
 @Configuration
-@ComponentScan(basePackages = { "integration.repository"})
+@ComponentScan(basePackages = { "integration"})
 public class AppConfiguration {
 
     @Bean

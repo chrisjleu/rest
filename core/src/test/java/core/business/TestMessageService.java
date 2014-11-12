@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import core.model.Message;
+import core.service.MessageService;
 
 public class TestMessageService {
 

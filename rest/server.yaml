@@ -30,6 +30,12 @@ server:
 #      keyStorePassword: example
 #      validateCerts: false
 
+# Authentication cache policy
+# This caches up to 10,000 principals with an LRU policy, evicting stale entries after 10 minutes.
+authenticationCachePolicy:
+  maxCacheSize: 10000
+  cacheExpiryTime: 10m
+
 # Logging settings.
 logging:
 
@@ -41,5 +47,6 @@ logging:
 
     # Overrides the level of server.dw to DEBUG.
     "server.dw.resource.MessageResource": DEBUG
-    "core.business.MessageService": DEBUG
-    "core.business.UserService": DEBUG
+    "server.dw.resource.AuthenticationResource": DEBUG
+    "core.service.MessageService": DEBUG
+    "core.service.UserService": DEBUG

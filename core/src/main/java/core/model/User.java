@@ -20,14 +20,23 @@ public class User {
     private String id;
 
     @NotNull
+    @Setter(AccessLevel.NONE)
     private String username;
 
+    @NotNull
+    @Setter(AccessLevel.NONE)
+    private String alias;
+
     @Email
+    @Setter(AccessLevel.NONE)
     private String email;
 
     @JsonCreator
-    public User(@JsonProperty("username") String username, @JsonProperty("email") String email) {
+    public User(@JsonProperty("_id") String id, @JsonProperty("username") String username,
+            @JsonProperty("email") String email, @JsonProperty("alias") String alias) {
+        this.id = id;
         this.username = username;
         this.email = email;
+        this.alias = alias;
     }
 }

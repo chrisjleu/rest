@@ -20,7 +20,7 @@ import api.representations.Message;
 
 import com.codahale.metrics.annotation.Timed;
 
-import core.business.MessageService;
+import core.service.MessageService;
 
 /**
  * <p>
@@ -81,7 +81,7 @@ public class MessageResource {
     @POST
     @Timed
     public Response send(@Valid Message message) {
-        logger.debug("Adding " + message);
+        logger.debug("Recieved message {}", message);
         messageService.add(Message.toModel(message));
         return Response.noContent().build();
     }
