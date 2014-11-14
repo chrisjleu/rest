@@ -24,7 +24,7 @@ import api.representations.User;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilderSpec;
 
-import core.config.AppConfiguration;
+import core.AppConfiguration;
 import core.service.MessageService;
 import core.service.UserService;
 

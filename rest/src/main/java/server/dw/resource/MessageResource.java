@@ -20,6 +20,7 @@ import api.representations.Message;
 
 import com.codahale.metrics.annotation.Timed;
 
+import core.model.request.CreateMessageRequest;
 import core.service.MessageService;
 
 /**
@@ -62,9 +63,12 @@ public class MessageResource {
     public List<Message> all() {
         List<core.model.Message> coreMessages = messageService.all();
         List<Message> messages = new ArrayList<>();
-        for (core.model.Message message : coreMessages) {
-            messages.add(Message.fromModel(message));
+        if (coreMessages != null) {
+            for (core.model.Message message : coreMessages) {
+                messages.add(Message.fromModel(message));
+            }
         }
+
         return messages;
     }
 
@@ -75,14 +79,16 @@ public class MessageResource {
      * curl -X POST -H "Content-Type: application/json" -d '{"v":"This is a message", "ln":1.0, "lt":1.0}' http://localhost:8080/m
      * </pre>
      * 
-     * @param message
+     * @param m
+     *            The message that the user has sent.
      * @return
      */
     @POST
     @Timed
-    public Response send(@Valid Message message) {
-        logger.debug("Recieved message {}", message);
-        messageService.add(Message.toModel(message));
+    public Response send(@Valid Message m) {
+        logger.debug("Recieved message {}", m);
+        CreateMessageRequest req = new CreateMessageRequest(m.getValue(), m.getLatidude(), m.getLongitude());
+        messageService.add(req);
         return Response.noContent().build();
     }
 

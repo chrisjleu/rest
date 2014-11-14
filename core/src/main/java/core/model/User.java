@@ -1,39 +1,29 @@
 package core.model;
 
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+import lombok.Data;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
-
+/**
+ * A User POJO.
+ */
 @Data
 public class User {
 
-    @Id
-    @Setter(AccessLevel.NONE)
-    private String id;
+    @NotBlank
+    private final String id;
 
-    @NotNull
-    @Setter(AccessLevel.NONE)
-    private String username;
+    @NotBlank
+    private final String username;
 
-    @NotNull
-    @Setter(AccessLevel.NONE)
-    private String alias;
+    @NotBlank
+    private final String alias;
 
     @Email
-    @Setter(AccessLevel.NONE)
-    private String email;
+    private final String email;
 
-    @JsonCreator
-    public User(@JsonProperty("_id") String id, @JsonProperty("username") String username,
-            @JsonProperty("email") String email, @JsonProperty("alias") String alias) {
+    public User(String id, String username, String email, String alias) {
         this.id = id;
         this.username = username;
         this.email = email;

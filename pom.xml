@@ -8,7 +8,8 @@
     <name>parent</name>
     
 	<modules>
-        <module>core</module>
         <module>rest</module>
-    </modules>
+	    <module>core</module>
+        <module>persist</module>
+	</modules>
 </project>

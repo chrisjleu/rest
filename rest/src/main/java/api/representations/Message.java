@@ -53,7 +53,4 @@ public class Message {
         return message;
     }
 
-    public static core.model.Message toModel(Message m) {
-        return new core.model.Message(m.getValue(), m.getLatidude(), m.getLongitude());
-    }
 }

@@ -1,22 +1,25 @@
 package core.service;
 
+import integration.api.model.InsertResult;
+import integration.api.model.message.MessageDao;
 import integration.api.repository.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import core.model.Message;
+import core.model.request.CreateMessageRequest;
 
 /**
  * <p>
- * Does all the things related to messages (for now).
+ * Handles all {@link Message} related things.
  * </p>
  */
 @Service
@@ -24,10 +27,10 @@ public class MessageService {
 
     Logger logger = LoggerFactory.getLogger(MessageService.class);
 
-    private final Repository<Message> repository;
+    private final Repository<MessageDao> repository;
 
     @Inject
-    public MessageService(Repository<Message> repository) {
+    public MessageService(Repository<MessageDao> repository) {
         this.repository = repository;
     }
 
@@ -37,12 +40,18 @@ public class MessageService {
      * @param message
      * @return The saved {@link Message}.
      */
-    public Message add(@Valid Message message) {
-        logger.debug("Inserting {}", message);
+    public Message add(@Valid CreateMessageRequest request) {
+        logger.debug("Proceeding to create message from request: {}", request);
 
-        Message savedMessage = repository.insert(message);
+        MessageDao messageDao = toMessageDao(request);
 
-        return enhanceMessage(savedMessage);
+        InsertResult<MessageDao> insertResult = repository.insert(messageDao);
+
+        Message message = Message.fromDao(insertResult.getInserted());
+
+        logger.debug("Created message: {}", message);
+
+        return message;
     }
 
     /**
@@ -68,7 +77,7 @@ public class MessageService {
      * @return
      */
     public List<Message> all() {
-        return enhanceMessages(repository.all());
+        return toMessageList(repository.all());
     }
 
     /**
@@ -77,27 +86,31 @@ public class MessageService {
      * @return
      */
     public List<Message> allInRange(double ln, double lt, double maxDistance) {
-        return enhanceMessages(repository.allInRange(ln, lt, maxDistance));
+        return toMessageList(repository.allInRange(ln, lt, maxDistance));
     }
 
     /**
-     * Computes any other fields to the saved {@link Message}s for convenience.
+     * Converts a {@link CreateMessageRequest} to a {@link MessageDao}.
+     * 
+     * @param request
+     * @return
      */
-    private List<Message> enhanceMessages(List<Message> messages) {
-        for (Message message : messages) {
-            enhanceMessage(message);
+    MessageDao toMessageDao(CreateMessageRequest request) {
+        return new MessageDao(request.getValue(), request.getLatidude(), request.getLongitude());
+    }
+
+    /**
+     * Converts Message Daos to the {@link Message} domain object.
+     */
+    List<Message> toMessageList(List<MessageDao> daos) {
+        List<Message> messages = new ArrayList<Message>();
+        if (daos != null && daos.size() > 0) {
+            for (MessageDao dao : daos) {
+                messages.add(Message.fromDao(dao));
+            }
         }
 
         return messages;
-    }
-
-    /**
-     * Computes any other fields to the saved {@link Message} for convenience.
-     */
-    private Message enhanceMessage(Message message) {
-        ObjectId mongoId = new ObjectId(message.getId());
-        message.setCreationDate(mongoId.getDate());
-        return message;
     }
 
 }

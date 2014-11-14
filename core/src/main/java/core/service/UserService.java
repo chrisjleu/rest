@@ -1,8 +1,7 @@
 package core.service;
 
-import integration.api.repository.Repository;
-import integration.service.auth.model.Account;
-import integration.service.auth.model.AuthenticationResult;
+import integration.api.model.auth.Account;
+import integration.api.model.auth.AuthenticationResult;
 import integration.service.auth.service.AuthenticationService;
 
 import javax.inject.Inject;
@@ -21,23 +20,11 @@ public class UserService {
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private final Repository<User> repository;
-
     private final AuthenticationService authService;
 
     @Inject
-    public UserService(Repository<User> repository, AuthenticationService authenticationService) {
-        this.repository = repository;
+    public UserService(AuthenticationService authenticationService) {
         this.authService = authenticationService;
-    }
-
-    /**
-     * Counts the number of users in the repository.
-     * 
-     * @return The total number of users in the repository.
-     */
-    public long count() {
-        return repository.count();
     }
 
     /**
