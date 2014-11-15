@@ -10,10 +10,10 @@ public class SpringApplicationContextManager implements Managed {
 
     Logger logger = LoggerFactory.getLogger(SpringApplicationContextManager.class);
     
-    private final ConfigurableApplicationContext ctx;
+    private final ConfigurableApplicationContext context;
 
     public SpringApplicationContextManager(ConfigurableApplicationContext ctx) {
-        this.ctx = ctx;
+        this.context = ctx;
     }
 
     @Override
@@ -23,8 +23,8 @@ public class SpringApplicationContextManager implements Managed {
 
     @Override
     public void stop() throws Exception {
-        logger.info("Shutting down Spring context " + ctx.getDisplayName());
-        ctx.close();
+        logger.info("Shutting down Spring context " + context.getDisplayName());
+        context.close();
     }
 
 }

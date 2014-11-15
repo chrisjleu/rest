@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import server.dw.config.AuthenticationCachePolicy;
+import server.dw.config.SpringContextFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,4 +31,19 @@ public class RestApplicationConfiguration extends Configuration {
     public void setAuthenticationCachePolicy(AuthenticationCachePolicy authenticationCachePolicy) {
         this.authenticationCachePolicy = authenticationCachePolicy;
     }
+
+    @Valid
+    @NotNull
+    private SpringContextFactory springContextFactory = new SpringContextFactory();
+
+    @JsonProperty("springContext")
+    public SpringContextFactory getSpringContextFactory() {
+        return springContextFactory;
+    }
+
+    @JsonProperty("springContext")
+    public void setSpringContextFactory(SpringContextFactory springContextFactory) {
+        this.springContextFactory = springContextFactory;
+    }
+
 }

@@ -18,8 +18,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
 @ComponentScan(basePackages = { "integration" })
-@PropertySources({ @PropertySource("classpath:default.properties"),
-        @PropertySource(value = "file:/${user.home}/override.properties", ignoreResourceNotFound = true) })
+@PropertySources({
+        @PropertySource(name = "default", value = "classpath:default.properties"),
+        @PropertySource(name = "override", value = "file:///${user.home}/override.properties", ignoreResourceNotFound = true) })
 public class AppConfiguration {
 
     @Bean
@@ -32,12 +33,12 @@ public class AppConfiguration {
     @Value("${MONGO_URI}")
     private String mongoDbConnectionUri;
 
-    @Value("${mongo.db.name}") 
+    @Value("${mongo.db.name}")
     private String mongoDbName;
-    
-    @Value("${mongo.collection.messages}") 
+
+    @Value("${mongo.collection.messages}")
     private String messageCollection;
-    
+
     @Bean
     public MongoDbConfiguration mongoDbConfiguration() throws Exception {
         return new MongoDbConfiguration(mongoDbConnectionUri, mongoDbName, messageCollection);

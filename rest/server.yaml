@@ -30,6 +30,12 @@ server:
 #      keyStorePassword: example
 #      validateCerts: false
 
+# Since all important (service) classes are provided by Spring, this must be configured to start the Spring context
+springContext:
+  displayName: Spring context
+  parentContextDisplayName: Spring parent context
+  applicationConfigurationClass: core.AppConfiguration
+
 # Authentication cache policy
 # This caches up to 10,000 principals with an LRU policy, evicting stale entries after 10 minutes.
 authenticationCachePolicy:
@@ -50,3 +56,4 @@ logging:
     "server.dw.resource.AuthenticationResource": DEBUG
     "core.service.MessageService": DEBUG
     "core.service.UserService": DEBUG
+    "org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG

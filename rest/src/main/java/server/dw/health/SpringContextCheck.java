@@ -6,18 +6,18 @@ import com.codahale.metrics.health.HealthCheck;
 
 public class SpringContextCheck extends HealthCheck {
  
-    private ConfigurableApplicationContext ctx;
+    private ConfigurableApplicationContext context;
  
     public SpringContextCheck(ConfigurableApplicationContext ctx) {
-        this.ctx = ctx;
+        this.context = ctx;
     }
  
     @Override
     protected Result check() throws Exception {
-        if(ctx.isActive() && ctx.isRunning()) {
-            return Result.healthy("Spring context " + ctx.getDisplayName() + " is active and running!");
+        if(context.isActive() && context.isRunning()) {
+            return Result.healthy(context.getDisplayName() + " is active and running!");
         }
-        return Result.unhealthy("Spring context " + ctx.getDisplayName() + " is either innactive or not running");
+        return Result.unhealthy(context.getDisplayName() + " is either innactive or not running");
     }
  
 }
