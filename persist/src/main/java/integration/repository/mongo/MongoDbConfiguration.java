@@ -2,8 +2,6 @@ package integration.repository.mongo;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.mongodb.MongoClient;
 
 /**

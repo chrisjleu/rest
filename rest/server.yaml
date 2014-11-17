@@ -56,4 +56,6 @@ logging:
     "server.dw.resource.AuthenticationResource": DEBUG
     "core.service.MessageService": DEBUG
     "core.service.UserService": DEBUG
+    "integration.service.auth": DEBUG
+    "integration.repository.mongo": DEBUG
     "org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG

@@ -25,11 +25,14 @@ public class UserAuthenticator implements Authenticator<BasicCredentials, User> 
 
     @Override
     public Optional<User> authenticate(BasicCredentials creds) throws AuthenticationException {
+        logger.debug("Authenticating \"{}\"", creds);
+        
         core.model.User authenticatedUser = userService.authenticate(creds.getUsername(), creds.getPassword());
         if (authenticatedUser == null) {
             return Optional.absent();
         }
-        return Optional.of(new User(authenticatedUser.getAlias()));
+
+        return Optional.of(new User(authenticatedUser.getEmail(), authenticatedUser.getAlias()));
     }
 
 }

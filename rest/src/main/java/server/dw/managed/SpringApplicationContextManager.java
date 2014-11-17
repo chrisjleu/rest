@@ -23,7 +23,7 @@ public class SpringApplicationContextManager implements Managed {
 
     @Override
     public void stop() throws Exception {
-        logger.info("Shutting down Spring context " + context.getDisplayName());
+        logger.info("Shutting down Spring context \"{}\"", context.getDisplayName());
         context.close();
     }
 

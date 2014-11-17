@@ -1,6 +1,6 @@
-package integration.service.auth.service;
+package integration.service.auth;
 
-import integration.api.model.auth.AuthenticationResult;
+import integration.api.model.user.auth.AuthenticationResult;
 
 /**
  * Provides services around user authentication.

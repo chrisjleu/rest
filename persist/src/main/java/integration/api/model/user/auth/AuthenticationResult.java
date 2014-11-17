@@ -1,4 +1,4 @@
-package integration.api.model.auth;
+package integration.api.model.user.auth;
 
 import lombok.Data;
 
@@ -8,5 +8,5 @@ import lombok.Data;
 @Data
 public class AuthenticationResult {
 
-    Account account;
+    AccountDao account;
 }

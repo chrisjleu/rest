@@ -1,6 +1,7 @@
 package integration.config;
 
 import integration.api.model.message.MessageDao;
+import integration.api.model.user.auth.AccountDao;
 import integration.api.repository.Repository;
 import integration.repository.mongo.MongoDbConfiguration;
 import integration.repository.mongo.MongoDbRepository;
@@ -52,4 +53,10 @@ public class AppConfiguration {
     public Repository<MessageDao> messageRepositoryFactory() {
         return new MongoDbRepository<MessageDao>(MessageDao.class, mongoFactory);
     }
+
+    @Bean
+    public Repository<AccountDao> userAccountRepositoryFactory() {
+        return new MongoDbRepository<AccountDao>(AccountDao.class, mongoFactory);
+    }
+
 }

@@ -59,6 +59,8 @@ public class TestMessageService {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
+        when(repository.getType()).thenReturn(MessageDao.class);
+
         // Mock a message DAO that has already been persisted in the repository
         when(messageDao.getId()).thenReturn(MESSAGE_ID.toString());
         when(messageDao.getValue()).thenReturn(MESSAGE);
@@ -164,7 +166,7 @@ public class TestMessageService {
     }
 
     @Test
-    public void list_all_in_range_messages_in_the_repository() {
+    public void list_all_messages_that_are_within_range() {
         // Given
         when(repository.allInRange(LONGITUDE, LATITUDE, RANGE)).thenReturn(repoMessages);
 
@@ -180,6 +182,20 @@ public class TestMessageService {
         assertThat(message, is(asExpected(message)));
     }
 
+    @Test
+    public void check_messages_not_returned_when_out_of_range() {
+        // Given
+        when(repository.allInRange(LONGITUDE, LATITUDE, RANGE)).thenReturn(repoMessages);
+
+        // when
+        List<Message> messages = messageService.allInRange(LONGITUDE+1, LATITUDE+1, RANGE);
+
+        // then
+        assertNotNull(messages);
+        assertThat(messages, is(empty()));
+        assertThat(messages, hasSize(0));
+    }
+    
     /**
      * Tests that a message has all the values that are expected for these tests.
      * 

@@ -5,7 +5,8 @@
     <artifactId>parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>parent</name>
+    <name>Module container</name>
+    <description>Container project to build the other modules</description>
     
 	<modules>
         <module>rest</module>

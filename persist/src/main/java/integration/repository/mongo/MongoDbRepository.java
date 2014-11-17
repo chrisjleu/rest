@@ -1,6 +1,7 @@
 package integration.repository.mongo;
 
 import integration.api.model.InsertResult;
+import integration.api.model.PropertyValuePair;
 import integration.api.repository.Repository;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.mongojack.DBCursor;
+import org.mongojack.DBQuery;
+import org.mongojack.DBQuery.Query;
 import org.mongojack.JacksonDBCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ public class MongoDbRepository<T> implements Repository<T> {
     private final Class<T> typeParameterClass;
 
     MongoFactory mongofactory;
-    
+
     public MongoDbRepository(Class<T> typeParameterClass, MongoFactory mongofactory) {
         this.typeParameterClass = typeParameterClass;
         this.mongoFactory = mongofactory;
@@ -45,7 +48,7 @@ public class MongoDbRepository<T> implements Repository<T> {
     public Class<T> getType() {
         return typeParameterClass;
     }
-    
+
     @PostConstruct
     void init() {
         try {
@@ -54,6 +57,16 @@ public class MongoDbRepository<T> implements Repository<T> {
         } catch (Exception e) {
             throw new RuntimeException("Unable to construct " + MongoDbRepository.class.getName(), e);
         }
+    }
+
+    @Override
+    public T find(PropertyValuePair... pvps) {
+        Query[] queryExpressions = new Query[pvps.length];
+        for (int i = 0; i < pvps.length; i++) {
+            queryExpressions[i] = DBQuery.is(pvps[i].getPropertyName(), pvps[i].getPropertyValue());
+        }
+        Query matchAllValuesQuery = DBQuery.and(queryExpressions);
+        return collection.findOne(matchAllValuesQuery);
     }
 
     @Override

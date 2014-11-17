@@ -15,9 +15,9 @@ import server.dw.auth.UserAuthenticator;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
+import server.dw.task.ClearCachingAuthenticatorTask;
 import api.representations.User;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilderSpec;
 
 import core.service.MessageService;
@@ -54,7 +54,7 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // Start up a Spring context. This will be the provider of objects from the core module (rather than
         // instantiating them "manually" in this class)
         ConfigurableApplicationContext ctx = configuration.getSpringContextFactory().build(configuration, environment);
-        
+
         // ******************************************** //
         // ************ Custom Serializers ************ //
         // ******************************************** //
@@ -68,23 +68,27 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         environment.jersey().register(new MessageResource(messageService));
 
         // User login/registration resource
-        environment.jersey().register(new AuthenticationResource());
+        UserService userService = ctx.getBean(UserService.class);
+        environment.jersey().register(new AuthenticationResource(userService));
 
         // **************************************** //
         // ************ Authenticators ************ //
         // **************************************** //
         // A number of dependencies must be obtained in order to build the Authenticator
-        UserService userService = ctx.getBean(UserService.class);
         UserAuthenticator dbAuthenticator = new UserAuthenticator(userService);
-        MetricRegistry metricRegistry = new MetricRegistry();
         CacheBuilderSpec cachePolicy = configuration.getAuthenticationCachePolicy().buildPolicy();
 
         // Create an authenticator to provide basic authentication
         CachingAuthenticator<BasicCredentials, User> cachedAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
-                metricRegistry, dbAuthenticator, cachePolicy);
+                environment.metrics(), dbAuthenticator, cachePolicy);
         BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachedAuthenticator,
                 environment.getName());
 
+        // ******************************* //
+        // ************ Tasks ************ //
+        // ******************************* //
+        environment.admin().addTask(new ClearCachingAuthenticatorTask(cachedAuthenticator));
+        
         // Finally, register the authentication provider
         logger.info("Registering basic authentication provider with cache policy {}", cachePolicy);
         environment.jersey().register(basicAuthProvider);

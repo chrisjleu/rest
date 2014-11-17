@@ -13,8 +13,17 @@ public class User {
     @NotNull
     private final String alias;
 
+    private final String email;
+
     @JsonCreator
-    public User(@JsonProperty("alias") String alias) {
+    public User(@JsonProperty("email") String email, @JsonProperty("alias") String alias) {
+        this.email = email;
         this.alias = alias;
+    }
+
+    // TODO not sure if the two methods below should be in this class...
+
+    public static User fromModel(core.model.User user) {
+        return new User(user.getEmail(), user.getAlias());
     }
 }

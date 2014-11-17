@@ -11,8 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import api.representations.User;
+import api.representations.UserRegistrationRequest;
 
 import com.codahale.metrics.annotation.Timed;
+
+import core.service.UserService;
 
 /**
  * <p>
@@ -27,11 +30,17 @@ import com.codahale.metrics.annotation.Timed;
  * Resources related to logging in and registering users.
  * </p>
  */
-@Path("/greet")
-@Produces(MediaType.TEXT_PLAIN)
+@Path("/user")
+@Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
 public class AuthenticationResource {
 
     Logger logger = LoggerFactory.getLogger(AuthenticationResource.class);
+
+    private final UserService userService;
+
+    public AuthenticationResource(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * Send for example:
@@ -45,8 +54,17 @@ public class AuthenticationResource {
      */
     @POST
     @Timed
+    @Path("/greet")
     public String greet(@Auth User user) {
         logger.debug("Authenticating {}", user);
         return "Congratulations ".concat(user.getAlias()).concat(". You are authenticated.");
+    }
+
+    @POST
+    @Timed
+    @Path("/reg")
+    public User register(UserRegistrationRequest req) {
+        core.model.User user = userService.create(req.getEmail(), req.getAlias(), req.getPassword());
+        return User.fromModel(user);
     }
 }

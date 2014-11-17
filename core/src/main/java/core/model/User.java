@@ -15,17 +15,13 @@ public class User {
     private final String id;
 
     @NotBlank
-    private final String username;
-
-    @NotBlank
     private final String alias;
 
     @Email
     private final String email;
 
-    public User(String id, String username, String email, String alias) {
+    public User(String id, String email, String alias) {
         this.id = id;
-        this.username = username;
         this.email = email;
         this.alias = alias;
     }

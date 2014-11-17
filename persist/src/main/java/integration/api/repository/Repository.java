@@ -1,6 +1,7 @@
 package integration.api.repository;
 
 import integration.api.model.InsertResult;
+import integration.api.model.PropertyValuePair;
 
 import java.util.List;
 
@@ -15,7 +16,16 @@ public interface Repository<T> {
      * @return
      */
     public Class<T> getType();
-    
+
+    /**
+     * Find an item in the repository by matching on the given property-value pairs. All values must be matched in order
+     * for the object to be found.
+     * 
+     * @param propertyValues
+     * @return
+     */
+    public T find(PropertyValuePair... propertyValues);
+
     /**
      * Persists the object in the repository.
      * 
@@ -29,7 +39,6 @@ public interface Repository<T> {
      * Clears out the entire repository of all data.
      */
     public void drop();
-
 
     /**
      * Returns the total number of <code>T</code> objects in the repository.

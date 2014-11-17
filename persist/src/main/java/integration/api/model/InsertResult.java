@@ -3,7 +3,10 @@ package integration.api.model;
 import lombok.Data;
 
 /**
- * Represents the result of an attempt to persist something to a repository.
+ * <p>
+ * Represents the result of an attempt to persist something to a repository. This could be for instance the result of a
+ * request to create a new user or adding a message.
+ * </p>
  * 
  * @param <T>
  *            The persisted object.

@@ -1,8 +1,11 @@
 package core.service;
 
-import integration.api.model.auth.Account;
-import integration.api.model.auth.AuthenticationResult;
-import integration.service.auth.service.AuthenticationService;
+import integration.api.model.InsertResult;
+import integration.api.model.user.auth.AccountDao;
+import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.model.user.reg.NewUserRegistrationRequest;
+import integration.service.auth.AuthenticationService;
+import integration.service.auth.RegistrationService;
 
 import javax.inject.Inject;
 
@@ -22,16 +25,19 @@ public class UserService {
 
     private final AuthenticationService authService;
 
+    private final RegistrationService registrationService;
+
     @Inject
-    public UserService(AuthenticationService authenticationService) {
+    public UserService(AuthenticationService authenticationService, RegistrationService registrationService) {
         this.authService = authenticationService;
+        this.registrationService = registrationService;
     }
 
     /**
      * <p>
      * Authenticates a user.
      * </p>
-     * TODO: This should probably return and AuthenticationResult object or something similar at some point.
+     * TODO: Move this to an authentication service perhaps
      * 
      * @param username
      * @param password
@@ -39,12 +45,39 @@ public class UserService {
      */
     public User authenticate(String username, String password) {
         AuthenticationResult result = authService.authenticate(username, password);
-        Account account = result.getAccount();
-        if (account == null) {
+        AccountDao accountDao = result.getAccount();
+        if (accountDao == null) {
             // Not authenticated
+            logger.debug("Username \"{}\" not authenticated", username);
             return null;
         } else {
-            return new User(account.getId(), account.getUsername(), account.getEmail(), account.getAlias());
+            return new User(accountDao.getId(), accountDao.getEmail(), accountDao.getAlias());
         }
+    }
+
+    /**
+     * Create a new user.
+     * 
+     * @param email
+     * @param alias
+     * @param password
+     * @return The newly created user.
+     */
+    public User create(String email, String alias, String password) {
+        logger.debug("Proceeding to create user \"{}\"", alias);
+
+        // TODO what should be done with the alias?
+        // TODO what should be done with the Id?
+        // TODO Should probably map to an Account object instead of User
+        NewUserRegistrationRequest request = new NewUserRegistrationRequest(email, password);
+        request.setAlias(alias);
+        request.setEmail(email);
+        InsertResult<AccountDao> result = registrationService.register(request);
+        AccountDao account = result.getInserted();
+        User user = new User(account.getId(), email, alias);
+        
+        logger.debug("Created user {}", user);
+
+        return user;
     }
 }

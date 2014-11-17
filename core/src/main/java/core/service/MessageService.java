@@ -58,7 +58,7 @@ public class MessageService {
      * Deletes all messages from the repository.
      */
     public void dropAll() {
-        logger.warn("Deleting all documents of type \"{}\"", repository.getType());
+        logger.warn("Deleting all documents of type \"{}\"", repository.getType().getName());
         repository.drop();
     }
 
