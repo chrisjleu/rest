@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongojack.MongoCollection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @EqualsAndHashCode
 @ToString
+@MongoCollection(name="messages")
 public class MessageDao {
 
     @Id

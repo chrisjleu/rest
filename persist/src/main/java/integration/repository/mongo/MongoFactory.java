@@ -56,14 +56,13 @@ public class MongoFactory {
             }
         }
     }
-    
+
     /**
      * The mongo API documentation for <a href="https://api.mongodb.org/java/current/com/mongodb/MongoClient.html">
      * MongoClient</a> states that there should only be one object per JVM, so this property is only set once.
      */
     private MongoClient mongoClient;
 
-    
     /**
      * Gathers the configuration necessary to construct a {@link MongoClient}. The client itself is not created until it
      * is requested.
@@ -103,7 +102,7 @@ public class MongoFactory {
      */
     public MongoClient instance() throws Exception {
         MongoClient client = MongoClientHolder.INSTANCE;
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Returning client instance \"{}\": \"{}\"", client.hashCode(), client);
         }
         return client;
@@ -133,16 +132,13 @@ public class MongoFactory {
      * @throws {@link com.eeb.dropwizardmongo.exceptions.NullDBNameException} Throw in the db name is null.
      * @throws {@link NullCollectionNameException} Thrown if the collection name is null.
      */
-    public DBCollection buildColl() throws Exception {
-        if (mongoConfig.getCollName() == null)
-            throw new Exception("Collection name has not been configured");
-
-        if(logger.isDebugEnabled()) {
-            logger.debug("Building collection {}", mongoConfig.getCollName());
+    public DBCollection buildColl(String collectionName) throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Building collection \"{}\"", collectionName);
         }
-        
+
         final DB db = buildDB();
-        return db.getCollection(mongoConfig.getCollName());
+        return db.getCollection(collectionName);
 
     }
 

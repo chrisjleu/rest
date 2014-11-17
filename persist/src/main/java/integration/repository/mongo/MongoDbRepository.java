@@ -5,6 +5,7 @@ import integration.api.model.PropertyValuePair;
 import integration.api.repository.Repository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -13,9 +14,11 @@ import org.mongojack.DBCursor;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 import org.mongojack.JacksonDBCollection;
+import org.mongojack.MongoCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mongodb.DBCollection;
 import com.mongodb.QueryBuilder;
 
 /**
@@ -49,11 +52,21 @@ public class MongoDbRepository<T> implements Repository<T> {
         return typeParameterClass;
     }
 
+    // TODO Is this the best way to initialize the collection/db with MongoJack?
     @PostConstruct
     void init() {
         try {
-            // TODO Is this how to initialize the DB with MongoJack?
-            this.collection = JacksonDBCollection.wrap(mongoFactory.buildColl(), typeParameterClass, String.class);
+            String collectionName = null;
+            if (typeParameterClass.isAnnotationPresent(MongoCollection.class)) {
+                MongoCollection mongoCollection = typeParameterClass.getAnnotation(MongoCollection.class);
+                collectionName = mongoCollection.name();
+            } else {
+                collectionName = typeParameterClass.getSimpleName();
+            }
+
+            DBCollection coll = mongoFactory.buildColl(collectionName);
+            this.collection = JacksonDBCollection.wrap(coll, typeParameterClass, String.class);
+            logger.debug("Repository initilaized for collection \"{}\"", collection.getName());
         } catch (Exception e) {
             throw new RuntimeException("Unable to construct " + MongoDbRepository.class.getName(), e);
         }
@@ -66,12 +79,20 @@ public class MongoDbRepository<T> implements Repository<T> {
             queryExpressions[i] = DBQuery.is(pvps[i].getPropertyName(), pvps[i].getPropertyValue());
         }
         Query matchAllValuesQuery = DBQuery.and(queryExpressions);
-        return collection.findOne(matchAllValuesQuery);
+        T document = collection.findOne(matchAllValuesQuery);
+
+        if (document == null) {
+            logger.debug("Could not match {} in collection {}", Arrays.toString(pvps), collection.getName());
+        } else {
+            logger.debug("Found {} in collection {}", document, collection.getName());
+        }
+
+        return document;
     }
 
     @Override
     public InsertResult<T> insert(T insertable) {
-        logger.debug("Inserting {}", insertable);
+        logger.debug("Inserting {} into {}", insertable, collection.getName());
         T inserted = collection.insert(insertable).getSavedObject();
         return new InsertResult<T>(inserted);
     }
@@ -90,6 +111,7 @@ public class MongoDbRepository<T> implements Repository<T> {
     @Override
     public List<T> all() {
         DBCursor<T> dbCursor = collection.find().limit(100);
+        logger.debug("Found {} documents in collection {}", dbCursor.size(), collection.getName());
         return toDocumentList(dbCursor);
     }
 

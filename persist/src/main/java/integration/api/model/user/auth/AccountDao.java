@@ -6,12 +6,14 @@ import lombok.Data;
 import lombok.ToString;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongojack.MongoCollection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @ToString(exclude="password")
+@MongoCollection(name="accounts")
 public class AccountDao {
 
     @Id

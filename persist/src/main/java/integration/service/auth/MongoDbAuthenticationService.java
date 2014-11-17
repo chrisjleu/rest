@@ -1,15 +1,15 @@
 package integration.service.auth;
 
+import integration.api.model.PropertyValuePair;
+import integration.api.model.user.auth.AccountDao;
+import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.repository.Repository;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import integration.api.model.PropertyValuePair;
-import integration.api.model.user.auth.AccountDao;
-import integration.api.model.user.auth.AuthenticationResult;
-import integration.api.repository.Repository;
 
 @Service
 public class MongoDbAuthenticationService implements AuthenticationService {
@@ -26,14 +26,26 @@ public class MongoDbAuthenticationService implements AuthenticationService {
     @Override
     public AuthenticationResult authenticate(String username, String password) {
         logger.debug("Proceeding to authenticate user \"{}\"", username);
-        
-        PropertyValuePair usernamePair = PropertyValuePair.of("username", username);
-        PropertyValuePair passwordPair = PropertyValuePair.of("password", password);
-        AccountDao account = userAccountRepository.find(usernamePair, passwordPair);
-        
-        AuthenticationResult authenticationResult = new AuthenticationResult();
-        authenticationResult.setAccount(account);
-        return authenticationResult;
+        try {
+            PropertyValuePair usernamePair = PropertyValuePair.of("username", username);
+            AccountDao account = userAccountRepository.find(usernamePair);
+
+            AuthenticationResult authenticationResult = new AuthenticationResult();
+            if (account == null) {
+                logger.debug("Not authenticated: User \"{}\" does not exist", username);
+            } else {
+                boolean passwordCorrect = PasswordHasher.check(password, account.getPassword());
+                if (passwordCorrect) {
+                    authenticationResult.setAccount(account);
+                } else {
+                    logger.debug("Not authenticated: User \"{}\" password not matched", username);
+                }
+            }
+
+            return authenticationResult;
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while attempting to authenticate user " + username, e);
+        }
     }
 
 }

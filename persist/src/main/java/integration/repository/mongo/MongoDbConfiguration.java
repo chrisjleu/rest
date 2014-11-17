@@ -2,6 +2,8 @@ package integration.repository.mongo;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.Data;
+
 import com.mongodb.MongoClient;
 
 /**
@@ -9,6 +11,7 @@ import com.mongodb.MongoClient;
  * Encapsulates information needed to create a {@link MongoClient}.
  * </p>
  */
+@Data
 public class MongoDbConfiguration {
 
     /**
@@ -18,17 +21,13 @@ public class MongoDbConfiguration {
      * mongodb://host:port
      * </pre>
      */
-    private String mongoClientUri;
+    private final String mongoClientUri;
 
     /**
      * Optional name of the database.
      */
-    private String dbName;
+    private final String dbName;
 
-    /**
-     * Optional name of the collection to be set.
-     */
-    private String collName;
 
     /**
      * The mongo client URI must be supplied but other values are optional.
@@ -37,13 +36,10 @@ public class MongoDbConfiguration {
      *            A URI in the format: <code>mongodb://host:port</code>
      * @param dbName
      *            Optional name of the database.
-     * @param collName
-     *            Optional name of the collection to be set.
      */
-    public MongoDbConfiguration(@NotNull String mongoClientUri, String dbName, String collName) {
+    public MongoDbConfiguration(@NotNull String mongoClientUri, String dbName) {
         this.mongoClientUri = mongoClientUri;
         this.dbName = dbName;
-        this.collName = collName;
     }
 
     // ////////////////// GETTERS AND SETTERS //////////////////////
@@ -54,10 +50,6 @@ public class MongoDbConfiguration {
 
     public String getDbName() {
         return dbName;
-    }
-
-    public String getCollName() {
-        return collName;
     }
 
 }

@@ -17,6 +17,7 @@ public class PasswordHasher {
     private static final int ITERATIONS = 10 * 1024;
     private static final int SALT_LENGTH = 32;
     private static final int DESIRED_KEY_LENGTH = 256;
+    private static final String SECRET_KEY_FUNCTION = "PBKDF2WithHmacSHA1";
 
     /**
      * Checks whether given plain text password corresponds to a stored salted hash of the password.
@@ -48,10 +49,18 @@ public class PasswordHasher {
         return Base64.encodeBase64String(salt) + "$" + hash(rawPassword, salt);
     }
 
+    /**
+     * Using PBKDF2 from Sun http://en.wikipedia.org/wiki/PBKDF2, an alternative is https://github.com/wg/scrypt.
+     * 
+     * @param password
+     * @param salt
+     * @return
+     * @throws Exception
+     */
     private static String hash(String password, byte[] salt) throws Exception {
         if (password == null || password.length() == 0)
             throw new IllegalArgumentException("Empty passwords are not supported.");
-        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        SecretKeyFactory f = SecretKeyFactory.getInstance(SECRET_KEY_FUNCTION);
         SecretKey key = f.generateSecret(new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, DESIRED_KEY_LENGTH));
         return Base64.encodeBase64String(key.getEncoded());
     }

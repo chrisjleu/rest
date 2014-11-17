@@ -37,12 +37,9 @@ public class AppConfiguration {
     @Value("${mongo.db.name}")
     private String mongoDbName;
 
-    @Value("${mongo.collection.messages}")
-    private String messageCollection;
-
     @Bean
     public MongoDbConfiguration mongoDbConfiguration() throws Exception {
-        return new MongoDbConfiguration(mongoDbConnectionUri, mongoDbName, messageCollection);
+        return new MongoDbConfiguration(mongoDbConnectionUri, mongoDbName);
     }
 
     // NOTE: Ensure that mongoDbConnectionUri is resolved before this is injected

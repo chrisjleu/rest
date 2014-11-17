@@ -9,6 +9,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(staticName = "of")
 public class PropertyValuePair {
+    
     private String propertyName;
+    
     private Object propertyValue;
+    
 }
