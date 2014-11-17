@@ -38,18 +38,24 @@ import core.service.UserService;
  */
 public class RestApplication extends Application<RestApplicationConfiguration> {
 
-    private Logger logger = LoggerFactory.getLogger(RestApplication.class);
+    private static Logger logger = LoggerFactory.getLogger(RestApplication.class);
 
     public static void main(String[] args) throws Exception {
         new RestApplication().run(args);
     }
 
     @Override
+    public String getName() {
+        return "DropWizard Experiment";
+    }
+    
+    @Override
     public void initialize(Bootstrap<RestApplicationConfiguration> bootstrap) {
     }
 
     @Override
     public void run(RestApplicationConfiguration configuration, Environment environment) throws Exception {
+        logger.info("Running: {}", environment.getName());
 
         // Start up a Spring context. This will be the provider of objects from the core module (rather than
         // instantiating them "manually" in this class)
@@ -84,14 +90,13 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachedAuthenticator,
                 environment.getName());
 
+        // Finally, register the authentication provider
+        environment.jersey().register(basicAuthProvider);
+
         // ******************************* //
         // ************ Tasks ************ //
         // ******************************* //
         environment.admin().addTask(new ClearCachingAuthenticatorTask(cachedAuthenticator));
-        
-        // Finally, register the authentication provider
-        logger.info("Registering basic authentication provider with cache policy {}", cachePolicy);
-        environment.jersey().register(basicAuthProvider);
 
     }
 

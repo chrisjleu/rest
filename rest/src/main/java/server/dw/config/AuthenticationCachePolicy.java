@@ -4,12 +4,16 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.cache.CacheBuilderSpec;
 
 public class AuthenticationCachePolicy {
 
+    private static Logger logger = LoggerFactory.getLogger(AuthenticationCachePolicy.class);
+    
     private static final String CACHE_SPECIFICATION = "maximumSize=%s, expireAfterAccess=%s";
 
     @Min(0)
@@ -26,6 +30,7 @@ public class AuthenticationCachePolicy {
      */
     public CacheBuilderSpec buildPolicy() {
         String cacheSpec = String.format(CACHE_SPECIFICATION, maxCacheSize, cacheExpiryTime);
+        logger.info("Creating basic authentication provider with cache policy: {}", cacheSpec);
         return CacheBuilderSpec.parse(cacheSpec);
     }
 
