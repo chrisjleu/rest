@@ -18,7 +18,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
-@ComponentScan(basePackages = { "integration" })
+@ComponentScan(basePackages = { "integration.repository", "integration.service" })
 @PropertySources({
         @PropertySource(name = "default", value = "classpath:default.properties"),
         @PropertySource(name = "override", value = "file:///${user.home}/override.properties", ignoreResourceNotFound = true) })
