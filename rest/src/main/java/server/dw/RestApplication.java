@@ -7,11 +7,16 @@ import io.dropwizard.auth.basic.BasicCredentials;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import server.dw.auth.UserAuthenticator;
+import server.dw.jee.filter.HttpsEnforcer;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
@@ -48,7 +53,7 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
     public String getName() {
         return "DropWizard Experiment";
     }
-    
+
     @Override
     public void initialize(Bootstrap<RestApplicationConfiguration> bootstrap) {
     }
@@ -98,6 +103,11 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // ******************************* //
         environment.admin().addTask(new ClearCachingAuthenticatorTask(cachedAuthenticator));
 
+        // ************************************* //
+        // ************ JEE Filters ************ //
+        // ************************************* //
+        environment.servlets().addFilter("HttpsEnforcer", HttpsEnforcer.class)
+                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
     }
 
 }
