@@ -17,6 +17,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import server.dw.auth.UserAuthenticator;
 import server.dw.jee.filter.HttpsEnforcer;
+import server.dw.jee.filter.SSLTerminationChecker;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
@@ -106,6 +107,8 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // ************************************* //
         // ************ JEE Filters ************ //
         // ************************************* //
+        environment.servlets().addFilter("SSLTerminationChecker", SSLTerminationChecker.class)
+                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
         environment.servlets().addFilter("HttpsEnforcer", HttpsEnforcer.class)
                 .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
     }
