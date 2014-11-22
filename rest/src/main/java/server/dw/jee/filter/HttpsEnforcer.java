@@ -104,9 +104,12 @@ public class HttpsEnforcer implements Filter {
     }
 
     String constructSecureUrl(HttpServletRequest request) throws MalformedURLException {
-        URL secureUrl = new URL("https", request.getServerName(), request.getLocalPort(), request.getPathInfo());
+        // URL secureUrl = new URL("https", request.getServerName(), request.getLocalPort(), request.getPathInfo());
+        URL secureUrl = new URL("https", request.getServerName(), request.getPathInfo()); // No port specified
         StringBuilder secureUrlBuilder = new StringBuilder(secureUrl.toString());
-        secureUrlBuilder.append("?").append(request.getQueryString());
+        if (request.getQueryString() != null) {
+            secureUrlBuilder.append("?").append(request.getQueryString());
+        }
         return secureUrlBuilder.toString();
     }
 
