@@ -7,17 +7,14 @@ import io.dropwizard.auth.basic.BasicCredentials;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
+import javax.servlet.ServletRegistration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import server.dw.auth.UserAuthenticator;
-import server.dw.jee.filter.HttpsEnforcer;
-import server.dw.jee.filter.SSLTerminationChecker;
+import server.dw.jee.servlet.CacheFlushStatsServlet;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
@@ -91,26 +88,28 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         CacheBuilderSpec cachePolicy = configuration.getAuthenticationCachePolicy().buildPolicy();
 
         // Create an authenticator to provide basic authentication
-        CachingAuthenticator<BasicCredentials, User> cachedAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
+        CachingAuthenticator<BasicCredentials, User> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
                 environment.metrics(), dbAuthenticator, cachePolicy);
-        BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachedAuthenticator,
+        BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachingAuthenticator,
                 environment.getName());
 
         // Finally, register the authentication provider
         environment.jersey().register(basicAuthProvider);
 
         // ******************************* //
-        // ************ Tasks ************ //
+        // ************ Admin ************ //
         // ******************************* //
-        environment.admin().addTask(new ClearCachingAuthenticatorTask(cachedAuthenticator));
+        environment.admin().addTask(new ClearCachingAuthenticatorTask(cachingAuthenticator));
+
+        ServletRegistration.Dynamic servlet = environment.admin().addServlet("CacheFlushStatsServlet",
+                new CacheFlushStatsServlet(cachingAuthenticator));
+        servlet.addMapping("/cache");
 
         // ************************************* //
         // ************ JEE Filters ************ //
         // ************************************* //
-        environment.servlets().addFilter("SSLTerminationChecker", SSLTerminationChecker.class)
-                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-        environment.servlets().addFilter("HttpsEnforcer", HttpsEnforcer.class)
-                .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+        configuration.getFilterChainFactory().addAll(environment.servlets());
+
     }
 
 }

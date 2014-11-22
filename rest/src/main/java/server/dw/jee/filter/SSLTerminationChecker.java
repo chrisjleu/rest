@@ -19,8 +19,14 @@ public class SSLTerminationChecker implements Filter {
 
     private static final String X_FORWARDED_PROTO = "x-forwarded-proto";
 
+    private boolean isEnabled = true;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        String enabledFlag = filterConfig.getInitParameter("enabled");
+        if (enabledFlag != null) {
+            isEnabled = Boolean.parseBoolean(enabledFlag);
+        }
     }
 
     @Override
@@ -28,12 +34,14 @@ public class SSLTerminationChecker implements Filter {
             ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
 
-        String xForwardProtoHttpHeader = servletRequest.getHeader(X_FORWARDED_PROTO);
-        boolean isSecure = servletRequest.isSecure();
-        if ("https".equalsIgnoreCase(xForwardProtoHttpHeader) && !isSecure) {
-            logger.warn(
-                    "{} header is {} but the isSecure() method returns false. This indicates that the original request was sent securely (HTTPS) but was terminated before in reached this server and the server is not taking into account the header.",
-                    X_FORWARDED_PROTO, xForwardProtoHttpHeader);
+        if (isEnabled) {
+            String xForwardProtoHttpHeader = servletRequest.getHeader(X_FORWARDED_PROTO);
+            boolean isSecure = servletRequest.isSecure();
+            if ("https".equalsIgnoreCase(xForwardProtoHttpHeader) && !isSecure) {
+                logger.warn(
+                        "{} header is {} but the isSecure() method returns false. This indicates that the original request was sent securely (HTTPS) but was terminated before in reached this server and the server is not taking into account the header.",
+                        X_FORWARDED_PROTO, xForwardProtoHttpHeader);
+            }
         }
 
         chain.doFilter(request, response);

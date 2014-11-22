@@ -36,6 +36,18 @@ springContext:
   parentContextDisplayName: Spring parent context
   applicationConfigurationClass: core.AppConfiguration
 
+# Filters. They are added in the order listed
+filters:
+  filterChain:
+    - name: SSLTerminationChecker
+      className: server.dw.jee.filter.SSLTerminationChecker
+      path: /*
+      enabled: true
+    - name: HttpsEnforcer
+      className: server.dw.jee.filter.HttpsEnforcer
+      path: /*
+      enabled: true
+
 # Authentication cache policy
 # This caches up to 10,000 principals with an LRU policy, evicting stale entries after 10 minutes.
 authenticationCachePolicy:
@@ -54,8 +66,10 @@ logging:
     # Overrides the level of server.dw to DEBUG.
     "server.dw.resource.MessageResource": DEBUG
     "server.dw.resource.AuthenticationResource": DEBUG
+    "server.dw.jee.filter": DEBUG
     "core.service.MessageService": DEBUG
     "core.service.UserService": DEBUG
     "integration.service.auth": DEBUG
     "integration.repository.mongo": DEBUG
-    "org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG
+    # Turn on to debug why your Spring property is not discovered
+    # "org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG

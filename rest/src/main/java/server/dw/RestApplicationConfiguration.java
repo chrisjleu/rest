@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import server.dw.config.AuthenticationCachePolicy;
+import server.dw.config.FilterChainFactory;
 import server.dw.config.SpringContextFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +21,21 @@ public class RestApplicationConfiguration extends Configuration {
 
     @Valid
     @NotNull
+    private FilterChainFactory filterChainFactory = new FilterChainFactory();
+
+    @JsonProperty("filters")
+    public FilterChainFactory getFilterChainFactory() {
+        return filterChainFactory;
+    }
+    
+    @JsonProperty("filters")
+    public void setFilterChainFactory(FilterChainFactory filterChainFactory) {
+        this.filterChainFactory = filterChainFactory;
+    }
+
+    
+    @Valid
+    @NotNull
     AuthenticationCachePolicy authenticationCachePolicy = new AuthenticationCachePolicy();
 
     @JsonProperty("authenticationCachePolicy")
@@ -32,6 +48,7 @@ public class RestApplicationConfiguration extends Configuration {
         this.authenticationCachePolicy = authenticationCachePolicy;
     }
 
+    
     @Valid
     @NotNull
     private SpringContextFactory springContextFactory = new SpringContextFactory();
