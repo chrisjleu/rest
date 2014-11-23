@@ -43,9 +43,8 @@ public class FilterChainFactory {
             FilterRegistration.Dynamic filter = servlets.addFilter(filterConfig.getName(), clazz);
             filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, filterConfig.getPath());
             filter.setInitParameter("enabled", filterConfig.getEnabled());
-            logger.info("Added filter with configuration: {}", filterConfig);
+            logger.info("Factory {} added filter with configuration: {}", this.hashCode(), filterConfig);
         }
-
     }
 
 }

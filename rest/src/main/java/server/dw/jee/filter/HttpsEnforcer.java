@@ -4,7 +4,6 @@ import io.dropwizard.jetty.HttpConnectorFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -78,11 +77,10 @@ public class HttpsEnforcer implements Filter {
         if (isEnabled) {
             if (!request.isSecure()) {
                 if (!isOriginalRequestSecure(request.getHeader(X_FORWARDED_PROTO))) {
-                    // X-Forwared header does not indicate that the original request was secure
-                    // Therefore proceed with the redirect to the secure euivalent
-                    String secureUrl = constructSecureUrl(request);
-                    logger.debug("Redirecting non-secure request to \"{}\"", secureUrl);
-                    response.sendRedirect(secureUrl.toString());
+                    // X-Forwarded header does not indicate that the original request was secure
+                    // Therefore proceed with the redirect to the secure equivalent
+                    String location = constructSecureUrl(request);
+                    response.sendRedirect(location);
                     return;
                 }
             }
@@ -104,13 +102,20 @@ public class HttpsEnforcer implements Filter {
     }
 
     String constructSecureUrl(HttpServletRequest request) throws MalformedURLException {
-        // URL secureUrl = new URL("https", request.getServerName(), request.getLocalPort(), request.getPathInfo());
-        URL secureUrl = new URL("https", request.getServerName(), request.getPathInfo()); // No port specified
-        StringBuilder secureUrlBuilder = new StringBuilder(secureUrl.toString());
-        if (request.getQueryString() != null) {
-            secureUrlBuilder.append("?").append(request.getQueryString());
+        String originalRequestUrl = getFullURL(request);
+        String secureUrl = "https://" + originalRequestUrl.substring("http://".length());
+        logger.debug("Redirecting non-secure request \"{}\" to \"{}\"", originalRequestUrl, secureUrl);
+        return secureUrl;
+    }
+
+    String getFullURL(HttpServletRequest request) {
+        final StringBuilder requestURL = new StringBuilder(100).append(request.getRequestURL());
+        String queryString = request.getQueryString();
+        if (queryString == null) {
+            return requestURL.toString();
+        } else {
+            return requestURL.append('?').append(queryString).toString();
         }
-        return secureUrlBuilder.toString();
     }
 
     @Override

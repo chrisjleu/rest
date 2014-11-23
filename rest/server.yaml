@@ -3,7 +3,7 @@ server:
 
 # Configuration for "simple" server type. 
 # Apparantly this has been written specifically for Heroku users.
-# The Procfile should specify an override for this port like so: -Ddw.server.connector.port=$PORT 
+# The Procfile (start command) should specify an override for this port like so: -Ddw.server.connector.port=$PORT 
   type: simple
   applicationContextPath: /
   adminContextPath: /admin
@@ -35,6 +35,18 @@ springContext:
   displayName: Spring context
   parentContextDisplayName: Spring parent context
   applicationConfigurationClass: core.AppConfiguration
+
+# Admin page configuration
+admin:
+  security:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+  filters:
+    filterChain:
+      - name: AdminHttpsEnforcer
+        className: server.dw.jee.filter.HttpsEnforcer
+        path: /*
+        enabled: true
 
 # Filters. They are added in the order listed
 filters:

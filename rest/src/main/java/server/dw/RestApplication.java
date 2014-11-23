@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import server.dw.auth.UserAuthenticator;
+import server.dw.config.env.EnvironmentVariableInterpolationBundle;
 import server.dw.jee.servlet.CacheFlushStatsServlet;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
@@ -54,6 +55,7 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
 
     @Override
     public void initialize(Bootstrap<RestApplicationConfiguration> bootstrap) {
+        bootstrap.addBundle(new EnvironmentVariableInterpolationBundle());
     }
 
     @Override
@@ -96,20 +98,27 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // Finally, register the authentication provider
         environment.jersey().register(basicAuthProvider);
 
-        // ******************************* //
-        // ************ Admin ************ //
-        // ******************************* //
-        environment.admin().addTask(new ClearCachingAuthenticatorTask(cachingAuthenticator));
-
-        ServletRegistration.Dynamic servlet = environment.admin().addServlet("CacheFlushStatsServlet",
-                new CacheFlushStatsServlet(cachingAuthenticator));
-        servlet.addMapping("/cache");
-
         // ************************************* //
         // ************ JEE Filters ************ //
         // ************************************* //
         configuration.getFilterChainFactory().addAll(environment.servlets());
 
+        // ************************************ //
+        // ************ Admin page ************ //
+        // ************************************ //
+        // LOGIN SECURITY
+        environment.admin().setSecurityHandler(configuration.admin().getAdminSecurityProvider().instance());
+
+        // CUSTOM FILTERS
+        configuration.admin().getFilterChainFactory().addAll(environment.admin());
+
+        // TASKS:
+        environment.admin().addTask(new ClearCachingAuthenticatorTask(cachingAuthenticator));
+
+        // CUSTOM SERVLETS
+        ServletRegistration.Dynamic servlet = environment.admin().addServlet("CacheFlushStatsServlet",
+                new CacheFlushStatsServlet(cachingAuthenticator));
+        servlet.addMapping("/cache");
     }
 
 }
