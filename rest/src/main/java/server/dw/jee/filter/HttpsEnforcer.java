@@ -21,21 +21,37 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>
  * Ensures that non-secure HTTP requests are redirected to their secure equivalent. This includes any requests that are
- * The need for this can arise in environments where SSL termination occurs before the request reaches the application
- * server. See RFC 7239 (http://tools.ietf.org/html/rfc7239) for more information about the Forwarded HTTP Extension.
+ * SSL terminated and contain the appropriate X-Forward headers. See RFC 7239 (http://tools.ietf.org/html/rfc7239) for
+ * more information about the Forwarded HTTP Extension.
  * </p>
  * 
  * <p>
- * However, the <code>useForwardedHeaders</code> configuration variable of {@link HttpConnectorFactory} dictates whether
- * the <code>X-Forwarded</code> headers are taken into consideration when determining whether a request is secure or
- * not.
+ * If using DropWizard, the <code>useForwardedHeaders</code> configuration variable of {@link HttpConnectorFactory}
+ * dictates whether the <code>X-Forwarded</code> headers are taken into consideration when determining whether a request
+ * is secure or not. If this is set to true then the additional headers will be observed and the <code>isSecure</code>
+ * method of {@link HttpServletRequest} will behave as expected.
  * </p>
- * 
  * <p>
- * You might simulate a request like so:
+ * Note also that a 301 status code (moved permanently) is set (rather than the default 302 that is used by default with
+ * the <code>sendRedirect</code> method, although some existing HTTP/1.0 user agents will erroneously change a POST
+ * request into a GET as noted in the RFC 2616 section 10 (http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html).
+ * </p>
+ * <p>
+ * Simulate requests like so:
+ * 
+ * <pre>
+ * Http request with x-forwarded-proto header:
  * 
  * {@code curl -L -X POST -H "Content-Type: application/json" -H "x-forwarded-proto: https" http://localhost:8080}
  * 
+ * HTTP request no x-forwarded header
+ * 
+ * {@code curl -L -X POST -H "Content-Type: application/json" http://localhost:8080}
+ * 
+ * HTTPS request no x-forwarded header
+ * 
+ * {@code curl -L -X POST -H "Content-Type: application/json" https://localhost:8080}
+ * </pre>
  * <p>
  * <ul>
  * <li>{@code -L} instructs curl to follow redirects.</li>
@@ -80,7 +96,8 @@ public class HttpsEnforcer implements Filter {
                     // X-Forwarded header does not indicate that the original request was secure
                     // Therefore proceed with the redirect to the secure equivalent
                     String location = constructSecureUrl(request);
-                    response.sendRedirect(location);
+                    response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+                    response.setHeader("Location", location);
                     return;
                 }
             }
@@ -104,7 +121,7 @@ public class HttpsEnforcer implements Filter {
     String constructSecureUrl(HttpServletRequest request) throws MalformedURLException {
         String originalRequestUrl = getFullURL(request);
         String secureUrl = "https://" + originalRequestUrl.substring("http://".length());
-        logger.debug("Redirecting non-secure request \"{}\" to \"{}\"", originalRequestUrl, secureUrl);
+        logger.debug("Constructed \"{}\" from non-secure \"{}\"", secureUrl, originalRequestUrl);
         return secureUrl;
     }
 
