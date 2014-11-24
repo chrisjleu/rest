@@ -78,6 +78,7 @@ logging:
     # Overrides the level of server.dw to DEBUG.
     "server.dw.resource.MessageResource": DEBUG
     "server.dw.resource.AuthenticationResource": DEBUG
+    "server.dw.auth.AdminConstraintSecurityHandler": DEBUG
     "server.dw.jee.filter": DEBUG
     "core.service.MessageService": DEBUG
     "core.service.UserService": DEBUG

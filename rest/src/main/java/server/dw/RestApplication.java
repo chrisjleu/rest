@@ -106,11 +106,11 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // ************************************ //
         // ************ Admin page ************ //
         // ************************************ //
-        // LOGIN SECURITY
-        environment.admin().setSecurityHandler(configuration.admin().getAdminSecurityProvider().instance());
-
         // CUSTOM FILTERS
         configuration.admin().getFilterChainFactory().addAll(environment.admin());
+
+        // LOGIN SECURITY
+        environment.admin().setSecurityHandler(configuration.admin().getAdminSecurityProvider().instance());
 
         // TASKS:
         environment.admin().addTask(new ClearCachingAuthenticatorTask(cachingAuthenticator));
