@@ -6,7 +6,7 @@ import integration.api.model.user.auth.AuthenticationResult;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
 import integration.service.auth.AuthenticationService;
 import integration.service.auth.RegistrationService;
-
+import integration.api.model.Error;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -37,7 +37,6 @@ public class UserService {
      * <p>
      * Authenticates a user.
      * </p>
-     * TODO: Move this to an authentication service perhaps
      * 
      * @param username
      * @param password
@@ -66,18 +65,20 @@ public class UserService {
     public User create(String email, String alias, String password) {
         logger.debug("Proceeding to create user \"{}\"", alias);
 
-        // TODO what should be done with the alias?
-        // TODO what should be done with the Id?
-        // TODO Should probably map to an Account object instead of User
         NewUserRegistrationRequest request = new NewUserRegistrationRequest(email, password);
         request.setAlias(alias);
         request.setEmail(email);
+
         InsertResult<AccountDao> result = registrationService.register(request);
         AccountDao account = result.getInserted();
-        User user = new User(account.getId(), email, alias);
-        
-        logger.debug("Created user {}", user);
 
-        return user;
+        if (account == null) {
+            Error error = result.getError();
+            throw new RuntimeException(error.getMessage() + ", code=" + error.getCode());
+        } else {
+            User user = new User(account.getId(), email, alias);
+            logger.debug("Created user {}", user);
+            return user;
+        }
     }
 }

@@ -24,13 +24,15 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import core.model.Message;
 import core.model.request.CreateMessageRequest;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TestMessageService {
 
     @InjectMocks
@@ -57,7 +59,6 @@ public class TestMessageService {
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
 
         when(repository.getType()).thenReturn(MessageDao.class);
 
@@ -188,14 +189,14 @@ public class TestMessageService {
         when(repository.allInRange(LONGITUDE, LATITUDE, RANGE)).thenReturn(repoMessages);
 
         // when
-        List<Message> messages = messageService.allInRange(LONGITUDE+1, LATITUDE+1, RANGE);
+        List<Message> messages = messageService.allInRange(LONGITUDE + 1, LATITUDE + 1, RANGE);
 
         // then
         assertNotNull(messages);
         assertThat(messages, is(empty()));
         assertThat(messages, hasSize(0));
     }
-    
+
     /**
      * Tests that a message has all the values that are expected for these tests.
      * 
