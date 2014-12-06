@@ -6,7 +6,7 @@ import lombok.Data;
  * Encapsulates a failed or successful user authentication attempt.
  */
 @Data
-public class AuthenticationResult {
+public class AuthenticationResponse {
 
     AccountDao account;
 }

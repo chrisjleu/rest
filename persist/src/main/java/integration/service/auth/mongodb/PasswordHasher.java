@@ -1,4 +1,4 @@
-package integration.service.auth;
+package integration.service.auth.mongodb;
 
 import java.security.SecureRandom;
 
@@ -27,7 +27,7 @@ public class PasswordHasher {
      * @return
      * @throws Exception
      */
-    public static boolean check(String password, String stored) throws Exception {
+    static boolean check(String password, String stored) throws Exception {
         String[] saltAndPass = stored.split("\\$");
         if (saltAndPass.length != 2)
             return false;
@@ -43,7 +43,7 @@ public class PasswordHasher {
      * @return
      * @throws Exception
      */
-    public static String hashPassword(String rawPassword) throws Exception {
+    static String hashPassword(String rawPassword) throws Exception {
         byte[] salt = SecureRandom.getInstance("SHA1PRNG").generateSeed(SALT_LENGTH);
         // store the salt with the password
         return Base64.encodeBase64String(salt) + "$" + hash(rawPassword, salt);

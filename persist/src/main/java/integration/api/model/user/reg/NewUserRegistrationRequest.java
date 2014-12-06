@@ -1,7 +1,5 @@
 package integration.api.model.user.reg;
 
-import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 
 /**
@@ -10,10 +8,8 @@ import lombok.Data;
 @Data
 public class NewUserRegistrationRequest {
 
-    @NotNull
     final String username;
 
-    @NotNull
     final String password;
 
     String alias;

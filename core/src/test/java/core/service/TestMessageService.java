@@ -124,7 +124,7 @@ public class TestMessageService {
     }
 
     @Test
-    public void test_that_message_count_method_counts_properly() {
+    public void test_that_message_count_is_accurate() {
         // Given
         long actualMessageCount = (long) repoMessages.size();
         when(repository.count()).thenReturn(actualMessageCount);

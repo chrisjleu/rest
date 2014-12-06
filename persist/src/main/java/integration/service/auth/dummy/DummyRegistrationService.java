@@ -1,8 +1,9 @@
-package integration.service.auth;
+package integration.service.auth.dummy;
 
 import integration.api.model.InsertResult;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
+import integration.service.auth.RegistrationService;
 
 import java.util.UUID;
 
@@ -18,8 +19,7 @@ public class DummyRegistrationService implements RegistrationService {
 
     @Override
     public InsertResult<AccountDao> register(NewUserRegistrationRequest request) {
-        AccountDao dao = new AccountDao(request.getUsername(), request.getPassword());
-        dao.setAlias("Alias");
+        AccountDao dao = new AccountDao(request.getUsername(), request.getAlias());
         dao.setEmail(request.getUsername().concat("@gmail.com"));
         dao.setId(UUID.randomUUID().toString());
         return new InsertResult<AccountDao>(dao);

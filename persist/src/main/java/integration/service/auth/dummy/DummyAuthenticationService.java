@@ -1,7 +1,8 @@
-package integration.service.auth;
+package integration.service.auth.dummy;
 
 import integration.api.model.user.auth.AccountDao;
-import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.model.user.auth.AuthenticationResponse;
+import integration.service.auth.AuthenticationService;
 
 import java.util.UUID;
 
@@ -15,17 +16,16 @@ import org.springframework.stereotype.Service;
 @Profile("standalone")
 public class DummyAuthenticationService implements AuthenticationService {
 
-    public AuthenticationResult authenticate(String username, String password) {
+    public AuthenticationResponse authenticate(String username, String password) {
 
-        AuthenticationResult authenticationResult = new AuthenticationResult();
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         if ("name".equals(username) && "pwd".equals(password)) {
-            AccountDao accountDao = new AccountDao(username, password);
+            AccountDao accountDao = new AccountDao(username, "alias");
             accountDao.setId(UUID.randomUUID().toString());
-            accountDao.setAlias("your-alias");
             accountDao.setEmail(username.concat("@email.com"));
-            authenticationResult.setAccount(accountDao);
+            authenticationResponse.setAccount(accountDao);
         }
 
-        return authenticationResult;
+        return authenticationResponse;
     }
 }

@@ -5,6 +5,7 @@ import javax.persistence.Id;
 import lombok.Data;
 import lombok.ToString;
 
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongojack.MongoCollection;
 
@@ -20,18 +21,22 @@ public class AccountDao {
     String id;
 
     @NotBlank
+    @Email
     final String username;
 
     @NotBlank
-    final String password;
+    final String alias;
 
-    String alias;
+    @NotBlank
+    String password;
 
+    @NotBlank
+    @Email
     String email;
     
     @JsonCreator
-    public AccountDao(@JsonProperty("username") String username, @JsonProperty("password") String password) {
+    public AccountDao(@JsonProperty("username") String username, @JsonProperty("alias") String alias) {
         this.username = username;
-        this.password = password;
+        this.alias = alias;
     }
 }

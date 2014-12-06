@@ -2,7 +2,7 @@ package core.service;
 
 import integration.api.model.InsertResult;
 import integration.api.model.user.auth.AccountDao;
-import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.model.user.auth.AuthenticationResponse;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
 import integration.service.auth.AuthenticationService;
 import integration.service.auth.RegistrationService;
@@ -43,7 +43,7 @@ public class UserService {
      * @return The User that was authenticated or null otherwise.
      */
     public User authenticate(String username, String password) {
-        AuthenticationResult result = authService.authenticate(username, password);
+        AuthenticationResponse result = authService.authenticate(username, password);
         AccountDao accountDao = result.getAccount();
         if (accountDao == null) {
             // Not authenticated

@@ -5,6 +5,8 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
+import api.validation.Password;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,7 +16,7 @@ public class UserRegistrationRequest {
     @Email
     private final String email;
 
-    @NotBlank
+    @Password
     private final String password;
 
     @NotBlank

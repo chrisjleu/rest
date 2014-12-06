@@ -98,6 +98,7 @@ public class HttpsEnforcer implements Filter {
                     String location = constructSecureUrl(request);
                     response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
                     response.setHeader("Location", location);
+                    logger.info("Redirecting to {}", location);
                     return;
                 }
             }

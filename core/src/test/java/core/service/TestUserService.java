@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import integration.api.model.Error;
 import integration.api.model.InsertResult;
 import integration.api.model.user.auth.AccountDao;
-import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.model.user.auth.AuthenticationResponse;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
 import integration.service.auth.AuthenticationService;
 import integration.service.auth.RegistrationService;
@@ -40,7 +40,7 @@ public class TestUserService {
     private RegistrationService registrationService;
 
     @Mock
-    private AuthenticationResult authenticationResult;
+    private AuthenticationResponse authenticationResponse;
 
     @Mock
     private AccountDao accountDao;
@@ -65,14 +65,14 @@ public class TestUserService {
         when(accountDao.getPassword()).thenReturn(USER_PASSWORD);
 
         // Always return a result when
-        when(authService.authenticate(any(String.class), any(String.class))).thenReturn(authenticationResult);
+        when(authService.authenticate(any(String.class), any(String.class))).thenReturn(authenticationResponse);
 
     }
 
     @Test
     public void test_user_authentication_succeeds() {
         // Given
-        when(authenticationResult.getAccount()).thenReturn(accountDao);
+        when(authenticationResponse.getAccount()).thenReturn(accountDao);
 
         // when
         User user = userService.authenticate(USER_EMAIL, USER_PASSWORD);
@@ -87,7 +87,7 @@ public class TestUserService {
     @Test
     public void test_user_authentication_fails() {
         // Given;
-        when(authenticationResult.getAccount()).thenReturn(null);
+        when(authenticationResponse.getAccount()).thenReturn(null);
 
         // when
         String wrongPassword = USER_PASSWORD + "_is_wrong";

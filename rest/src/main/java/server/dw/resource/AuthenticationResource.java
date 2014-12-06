@@ -2,6 +2,7 @@ package server.dw.resource;
 
 import io.dropwizard.auth.Auth;
 
+import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -63,7 +64,7 @@ public class AuthenticationResource {
     @POST
     @Timed
     @Path("/reg")
-    public User register(UserRegistrationRequest req) {
+    public User register(@Valid UserRegistrationRequest req) {
         core.model.User user = userService.create(req.getEmail(), req.getAlias(), req.getPassword());
         return User.fromModel(user);
     }

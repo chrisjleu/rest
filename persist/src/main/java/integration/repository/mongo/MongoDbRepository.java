@@ -24,7 +24,8 @@ import com.mongodb.QueryBuilder;
 /**
  * <p>
  * An implementation of the {@link Repository} with MongoDb. This particular implementation uses the MongoJack library.
- * Could consider moving to Spring Data eventually with all of this.
+ * Each instance of this class operates on only one collection. Might consider moving to Spring Data eventually with all
+ * of this.
  * </p>
  * 
  * @param <T>
@@ -42,8 +43,16 @@ public class MongoDbRepository<T> implements Repository<T> {
 
     MongoFactory mongofactory;
 
-    public MongoDbRepository(Class<T> typeParameterClass, MongoFactory mongofactory) {
-        this.typeParameterClass = typeParameterClass;
+    /**
+     * Constructs a {@link Repository} with a Mongo DB implementation.
+     * 
+     * @param clazz
+     *            The class that this repository operates on. This has a one-to-one mapping with a Mongo DB Collection.
+     * @param mongofactory
+     *            Required to create the MongoDB collection.
+     */
+    public MongoDbRepository(Class<T> clazz, MongoFactory mongofactory) {
+        this.typeParameterClass = clazz;
         this.mongoFactory = mongofactory;
     }
 

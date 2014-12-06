@@ -1,6 +1,6 @@
 package integration.service.auth;
 
-import integration.api.model.user.auth.AuthenticationResult;
+import integration.api.model.user.auth.AuthenticationResponse;
 
 /**
  * Provides services around user authentication.
@@ -14,5 +14,5 @@ public interface AuthenticationService {
      * @param password
      * @return The result of the authentication request.
      */
-    public AuthenticationResult authenticate(String username, String password);
+    public AuthenticationResponse authenticate(String username, String password);
 }

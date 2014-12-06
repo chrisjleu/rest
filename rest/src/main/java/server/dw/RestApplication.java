@@ -66,6 +66,11 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // instantiating them "manually" in this class)
         ConfigurableApplicationContext ctx = configuration.getSpringContextFactory().build(configuration, environment);
 
+        // *********************************************** //
+        // ************ Set Jersey properties ************ //
+        // *********************************************** //
+        // environment.jersey().property("jersey.config.beanValidation.enableOutputValidationErrorEntity.server", false);
+        
         // ******************************************** //
         // ************ Custom Serializers ************ //
         // ******************************************** //
