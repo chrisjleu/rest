@@ -44,20 +44,32 @@ public class AuthenticationResource {
     }
 
     /**
+     * <p>
+     * Greets a user.
+     * </p>
+     * <p>
+     * The {@link User} is injected into the method, if authorized, courtesy of the {@link Auth} annotation. Then it can
+     * be used in the business logic in order to do the greeting.
+     * </p>
+     * 
+     * <p>
      * Send for example:
      * 
      * <pre>
      * curl -X POST -H "Content-Type: application/json" -d '{"alias":"JSmith"}' --user username:password http://localhost:8080/greet
      * </pre>
      * 
+     * </p>
+     * 
      * @param message
      * @return
+     * 
      */
     @POST
     @Timed
     @Path("/greet")
     public String greet(@Auth User user) {
-        logger.debug("Authenticating {}", user);
+        logger.debug("Authenticated {}!", user);
         return "Congratulations ".concat(user.getAlias()).concat(". You are authenticated.");
     }
 

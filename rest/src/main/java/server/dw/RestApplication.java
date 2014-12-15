@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import server.dw.auth.UserAuthenticator;
+import server.dw.auth.OAuth2Provider;
+import server.dw.auth.UserBasicAuthAuthenticator;
+import server.dw.auth.UserOauth2Authenticator;
 import server.dw.config.env.EnvironmentVariableInterpolationBundle;
 import server.dw.jee.servlet.CacheFlushStatsServlet;
 import server.dw.resource.AuthenticationResource;
@@ -69,8 +71,9 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // *********************************************** //
         // ************ Set Jersey properties ************ //
         // *********************************************** //
-        // environment.jersey().property("jersey.config.beanValidation.enableOutputValidationErrorEntity.server", false);
-        
+        // environment.jersey().property("jersey.config.beanValidation.enableOutputValidationErrorEntity.server",
+        // false);
+
         // ******************************************** //
         // ************ Custom Serializers ************ //
         // ******************************************** //
@@ -91,18 +94,21 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // ************ Authenticators ************ //
         // **************************************** //
         // A number of dependencies must be obtained in order to build the Authenticator
-        UserAuthenticator dbAuthenticator = new UserAuthenticator(userService);
+        UserBasicAuthAuthenticator userBasicAuthAuthenticator = new UserBasicAuthAuthenticator(userService);
         CacheBuilderSpec cachePolicy = configuration.getAuthenticationCachePolicy().buildPolicy();
 
         // Create an authenticator to provide basic authentication
         CachingAuthenticator<BasicCredentials, User> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
-                environment.metrics(), dbAuthenticator, cachePolicy);
+                environment.metrics(), userBasicAuthAuthenticator, cachePolicy);
         BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachingAuthenticator,
                 environment.getName());
 
         // Finally, register the authentication provider
-        environment.jersey().register(basicAuthProvider);
+        // environment.jersey().register(basicAuthProvider);
 
+        // This registers an Oauth2 provider
+        environment.jersey().register(
+                new OAuth2Provider<User>(new UserOauth2Authenticator(userService), environment.getName()));
         // ************************************* //
         // ************ JEE Filters ************ //
         // ************************************* //

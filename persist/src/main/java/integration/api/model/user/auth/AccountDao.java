@@ -1,5 +1,9 @@
 package integration.api.model.user.auth;
 
+import integration.api.model.apikey.ApiKey;
+
+import java.util.List;
+
 import javax.persistence.Id;
 
 import lombok.Data;
@@ -13,8 +17,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
-@ToString(exclude="password")
-@MongoCollection(name="accounts")
+@ToString(exclude = "password")
+@MongoCollection(name = "accounts")
 public class AccountDao {
 
     @Id
@@ -33,7 +37,9 @@ public class AccountDao {
     @NotBlank
     @Email
     String email;
-    
+
+    List<ApiKey> apiKeys;
+
     @JsonCreator
     public AccountDao(@JsonProperty("username") String username, @JsonProperty("alias") String alias) {
         this.username = username;

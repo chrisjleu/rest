@@ -2,6 +2,8 @@ package api.representations;
 
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.Email;
+
 import lombok.Data;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,6 +15,7 @@ public class User {
     @NotNull
     private final String alias;
 
+    @Email
     private final String email;
 
     @JsonCreator

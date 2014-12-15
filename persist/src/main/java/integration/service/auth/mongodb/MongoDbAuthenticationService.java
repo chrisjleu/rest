@@ -1,6 +1,7 @@
 package integration.service.auth.mongodb;
 
 import integration.api.model.PropertyValuePair;
+import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
 import integration.api.repository.Repository;
@@ -49,6 +50,12 @@ public class MongoDbAuthenticationService implements AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException("Exception while attempting to authenticate user " + username, e);
         }
+    }
+
+    @Override
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        // TODO Authenticate with either basic or oAuth authentication
+        return null;
     }
 
 }

@@ -13,13 +13,13 @@ import com.google.common.base.Optional;
 
 import core.service.UserService;
 
-public class UserAuthenticator implements Authenticator<BasicCredentials, User> {
+public class UserBasicAuthAuthenticator implements Authenticator<BasicCredentials, User> {
 
-    Logger logger = LoggerFactory.getLogger(UserAuthenticator.class);
+    Logger logger = LoggerFactory.getLogger(UserBasicAuthAuthenticator.class);
 
     private final UserService userService;
 
-    public UserAuthenticator(UserService userService) {
+    public UserBasicAuthAuthenticator(UserService userService) {
         this.userService = userService;
     }
 

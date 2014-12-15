@@ -1,5 +1,7 @@
 package server.dw.resource;
 
+import io.dropwizard.auth.Auth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import api.representations.Message;
+import api.representations.User;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -85,7 +88,7 @@ public class MessageResource {
      */
     @POST
     @Timed
-    public Response send(@Valid Message m) {
+    public Response send(@Auth User user, @Valid Message m) {
         logger.debug("Recieved message {}", m);
         CreateMessageRequest req = new CreateMessageRequest(m.getValue(), m.getLatidude(), m.getLongitude());
         messageService.add(req);

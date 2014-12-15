@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.1.1.RELEASE</spring.version>
 		<stormpath.version>1.0.RC3.preview.0</stormpath.version>
-			</properties>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -61,6 +61,12 @@
 			<groupId>com.stormpath.sdk</groupId>
 			<artifactId>stormpath-sdk-api</artifactId>
 			<version>${stormpath.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.stormpath.sdk</groupId>
+			<artifactId>stormpath-sdk-oauth</artifactId>
+			<version>${stormpath.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.stormpath.sdk</groupId>
