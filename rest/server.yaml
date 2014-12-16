@@ -75,13 +75,14 @@ logging:
   # Logger-specific levels.
   loggers:
 
-    # Overrides the level of server.dw to DEBUG.
-    "server.dw.resource.MessageResource": DEBUG
-    "server.dw.resource.AuthenticationResource": DEBUG
-    "server.dw.auth.AdminConstraintSecurityHandler": DEBUG
+    # Overrides the level of the specified server.dw classes to DEBUG.
+    "server.dw.resource": DEBUG
+    "server.dw.auth": DEBUG
     "server.dw.jee.filter": DEBUG
+    # core module classes to DEBUG.
     "core.service.MessageService": DEBUG
     "core.service.UserService": DEBUG
+    # persist module classes to DEBUG.
     "integration.service.auth": DEBUG
     "integration.repository.mongo": DEBUG
     # Turn on to debug why your Spring property is not discovered

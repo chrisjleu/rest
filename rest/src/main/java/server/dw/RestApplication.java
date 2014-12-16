@@ -13,15 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import server.dw.auth.BasicAuthAuthenticator;
 import server.dw.auth.OAuth2Provider;
-import server.dw.auth.UserBasicAuthAuthenticator;
 import server.dw.auth.UserOauth2Authenticator;
 import server.dw.config.env.EnvironmentVariableInterpolationBundle;
 import server.dw.jee.servlet.CacheFlushStatsServlet;
 import server.dw.resource.AuthenticationResource;
 import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
+import server.dw.resource.OauthTokenResource;
 import server.dw.task.ClearCachingAuthenticatorTask;
+import api.representations.TokenResponse;
 import api.representations.User;
 
 import com.google.common.cache.CacheBuilderSpec;
@@ -90,21 +92,23 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         UserService userService = ctx.getBean(UserService.class);
         environment.jersey().register(new AuthenticationResource(userService));
 
+        // Token resource for API access
+        environment.jersey().register(new OauthTokenResource());
+
         // **************************************** //
         // ************ Authenticators ************ //
         // **************************************** //
         // A number of dependencies must be obtained in order to build the Authenticator
-        UserBasicAuthAuthenticator userBasicAuthAuthenticator = new UserBasicAuthAuthenticator(userService);
+        BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator(userService);
         CacheBuilderSpec cachePolicy = configuration.getAuthenticationCachePolicy().buildPolicy();
 
         // Create an authenticator to provide basic authentication
-        CachingAuthenticator<BasicCredentials, User> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
-                environment.metrics(), userBasicAuthAuthenticator, cachePolicy);
-        BasicAuthProvider<User> basicAuthProvider = new BasicAuthProvider<User>(cachingAuthenticator,
+        CachingAuthenticator<BasicCredentials, TokenResponse> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, TokenResponse>(
+                environment.metrics(), basicAuthAuthenticator, cachePolicy);
+        BasicAuthProvider<TokenResponse> basicAuthProvider = new BasicAuthProvider<TokenResponse>(cachingAuthenticator,
                 environment.getName());
 
-        // Finally, register the authentication provider
-        // environment.jersey().register(basicAuthProvider);
+        environment.jersey().register(basicAuthProvider);
 
         // This registers an Oauth2 provider
         environment.jersey().register(

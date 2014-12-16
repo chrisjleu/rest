@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import core.model.Token;
 import core.model.User;
 import core.model.request.AuthenticationRequest;
 
@@ -35,6 +36,15 @@ public class UserService {
         this.registrationService = registrationService;
     }
 
+    public Token requestToken(String username, String password) {
+        // TODO connect to real service
+        Token token = new Token();
+        token.setAccessToken("DUMMY-TOKEN:DSFJH84KJSHR98JKHRKH89HKJNEOIER89435");
+        token.setExpiresIn("3600");
+        token.setTokenType("bearer");        
+        return token;
+    }
+    
     public User authenticate(AuthenticationRequest request) {
 
         AuthenticationResponse result = authService.authenticate(buildAuthenticationRequest(request));

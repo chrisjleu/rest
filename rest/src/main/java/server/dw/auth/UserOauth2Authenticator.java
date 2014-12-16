@@ -14,9 +14,8 @@ import core.service.UserService;
 
 public class UserOauth2Authenticator implements Authenticator<AuthenticationRequest, User> {
 
-    Logger logger = LoggerFactory.getLogger(UserBasicAuthAuthenticator.class);
+    Logger logger = LoggerFactory.getLogger(UserOauth2Authenticator.class);
 
-    // TODO this needs to be an AuthenticationService in the core module
     private final UserService userService;
 
     public UserOauth2Authenticator(UserService userService) {

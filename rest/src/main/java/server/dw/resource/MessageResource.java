@@ -82,6 +82,8 @@ public class MessageResource {
      * curl -X POST -H "Content-Type: application/json" -d '{"v":"This is a message", "ln":1.0, "lt":1.0}' http://localhost:8080/m
      * </pre>
      * 
+     * <p>The {@link User} is injected into the method, if authorized, courtesy of the {@link Auth} annotation</p>
+     * 
      * @param m
      *            The message that the user has sent.
      * @return
