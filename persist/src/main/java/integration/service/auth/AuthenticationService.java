@@ -1,5 +1,6 @@
 package integration.service.auth;
 
+import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AuthenticationResponse;
 
@@ -9,7 +10,7 @@ import integration.api.model.user.auth.AuthenticationResponse;
 public interface AuthenticationService {
 
     /**
-     * Authenticate the user given a username and password.
+     * Authenticate the user given a username and password. Useful mainly for basic authentication only.
      * 
      * @param username
      * @param password
@@ -18,7 +19,7 @@ public interface AuthenticationService {
     public AuthenticationResponse authenticate(String username, String password);
 
     /**
-     * Authenticates a request to use the API.
+     * Authenticates a user.
      * 
      * @param request
      *            A {@link AuthenticationRequest} that encapsulates the pertinent information that was send in the HTTP
@@ -26,4 +27,14 @@ public interface AuthenticationService {
      * @return The result of the authentication request.
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request);
+
+    /**
+     * Authenticates a user and a token is returned in exchange for the login credentials (i.e. the username and
+     * password).
+     * 
+     * @param request
+     * @return
+     */
+    public ApiToken authenticateForToken(AuthenticationRequest request);
+
 }

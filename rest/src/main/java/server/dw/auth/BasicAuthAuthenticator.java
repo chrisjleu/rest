@@ -28,7 +28,8 @@ public class BasicAuthAuthenticator implements Authenticator<BasicCredentials, T
     public Optional<TokenResponse> authenticate(BasicCredentials creds) throws AuthenticationException {
         logger.debug("\"{}\" wants an access token", creds.getUsername());
 
-        Token token = userService.requestToken(creds.getUsername(), creds.getPassword());
+
+        Token token = userService.requestToken(null); // TODO need to re-create the request somehow or write another custom provider
         if (token == null) {
             logger.debug("TokenResponse not granted to \"{}\"", creds.getUsername());
             return Optional.absent();

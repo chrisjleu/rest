@@ -1,5 +1,6 @@
 package integration.service.auth.stormpath;
 
+import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
@@ -7,44 +8,28 @@ import integration.service.auth.AuthenticationService;
 
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
-import com.stormpath.sdk.application.Application;
-import com.stormpath.sdk.application.ApplicationList;
-import com.stormpath.sdk.application.Applications;
 import com.stormpath.sdk.authc.AuthenticationResult;
 import com.stormpath.sdk.authc.UsernamePasswordRequest;
-import com.stormpath.sdk.client.Client;
 import com.stormpath.sdk.http.HttpMethod;
 import com.stormpath.sdk.http.HttpRequest;
 import com.stormpath.sdk.http.HttpRequests;
+import com.stormpath.sdk.oauth.AccessTokenResult;
 import com.stormpath.sdk.oauth.OauthAuthenticationResult;
+import com.stormpath.sdk.oauth.TokenResponse;
 import com.stormpath.sdk.resource.ResourceException;
 
 @Service
-public class StormpathAuthenticationService implements AuthenticationService {
+public class StormpathAuthenticationService extends AbstractStormpathService implements AuthenticationService {
 
-    private final StormpathClientFactory clientFactory;
+    Logger logger = LoggerFactory.getLogger(StormpathAuthenticationService.class);
 
-    private final String applicationName;
-
-    private Client client;
-
-    @Inject
-    public StormpathAuthenticationService(StormpathClientFactory clientFactory,
-            @Value("${application.name}") String applicationName) {
-        this.clientFactory = clientFactory;
-        this.applicationName = applicationName;
-    }
-
-    @PostConstruct
-    void init() {
-        this.client = clientFactory.instance();
+    public StormpathAuthenticationService(StormpathClientFactory factory, String applicationName) {
+        super(factory, applicationName);
     }
 
     @Override
@@ -59,8 +44,8 @@ public class StormpathAuthenticationService implements AuthenticationService {
             accountDao.setId(account.getHref());
             accountDao.setEmail(account.getEmail());
             response.setAccount(accountDao);
-        } catch (ResourceException ex) {
-            System.out.println(ex.getStatus() + " " + ex.getMessage());
+        } catch (ResourceException e) {
+            logger.error("Unable to authenticate user", e);
         }
 
         return response;
@@ -76,19 +61,34 @@ public class StormpathAuthenticationService implements AuthenticationService {
         try {
             OauthAuthenticationResult result = (OauthAuthenticationResult) getApplication().authenticateOauthRequest(
                     request).execute();
-            Account account = result.getAccount();
-            // ApiKeyList apiKeys = account.getApiKeys();
-            // apiKeys.
 
+            Account account = result.getAccount();
             AccountDao accountDao = new AccountDao(account.getUsername(), "alias");
             accountDao.setId(account.getHref());
             accountDao.setEmail(account.getEmail());
             response.setAccount(accountDao);
-        } catch (ResourceException ex) {
-            System.out.println(ex.getStatus() + " " + ex.getMessage());
+
+        } catch (ResourceException e) {
+            logger.error("Unable to authenticate user", e);
         }
 
         return response;
+    }
+
+    @Override
+    public ApiToken authenticateForToken(AuthenticationRequest request) {
+        AccessTokenResult result = (AccessTokenResult) getApplication().authenticateOauthRequest(request).execute();
+        
+        TokenResponse token = result.getTokenResponse();
+        
+        ApiToken apiToken = new ApiToken();
+        apiToken.setAccessToken(token.getAccessToken());
+        apiToken.setExpiresIn(token.getExpiresIn());
+        apiToken.setTokenType(token.getTokenType());
+        apiToken.setRefreshToken(token.getRefreshToken());
+        apiToken.setScope(token.getScope());
+        
+        return apiToken;
     }
 
     /**
@@ -121,14 +121,6 @@ public class StormpathAuthenticationService implements AuthenticationService {
      */
     HttpRequest buildHttpRequest(String method, Map<String, String[]> headers, String queryString) {
         return HttpRequests.method(HttpMethod.fromName(method)).headers(headers).queryParameters(queryString).build();
-    }
-
-    private Application getApplication() {
-        ApplicationList applications = client.getApplications(Applications.where(Applications.name().eqIgnoreCase(
-                applicationName)));
-
-        Application application = applications.iterator().next();
-        return application;
     }
 
 }

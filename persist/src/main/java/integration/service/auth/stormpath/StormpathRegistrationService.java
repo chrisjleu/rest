@@ -19,30 +19,16 @@ import com.stormpath.sdk.client.Client;
 import com.stormpath.sdk.directory.CustomData;
 
 @Service
-public class StormpathRegistrationService implements RegistrationService {
+public class StormpathRegistrationService extends AbstractStormpathService implements RegistrationService {
 
-    private final StormpathClientFactory clientFactory;
-
-    private final String applicationName;
-
-    private Client client;
-
-    @Inject
-    public StormpathRegistrationService(StormpathClientFactory clientFactory,
-            @Value("${application.name}") String applicationName) {
-        this.clientFactory = clientFactory;
-        this.applicationName = applicationName;
-    }
-
-    @PostConstruct
-    void init() {
-        this.client = clientFactory.instance();
+    StormpathRegistrationService(StormpathClientFactory factory, String applicationName) {
+        super(factory, applicationName);
     }
 
     @Override
     public InsertResult<AccountDao> register(NewUserRegistrationRequest request) {
         // Create the account object
-        Account account = client.instantiate(Account.class);
+        Account account = getClient().instantiate(Account.class);
 
         // Set the account properties
         account.setUsername(request.getUsername()); // optional, defaults to email if unset
@@ -70,11 +56,4 @@ public class StormpathRegistrationService implements RegistrationService {
         return accountDao;
     }
 
-    private Application getApplication() {
-        ApplicationList applications = client.getApplications(Applications.where(Applications.name().eqIgnoreCase(
-                applicationName)));
-
-        Application application = applications.iterator().next();
-        return application;
-    }
 }

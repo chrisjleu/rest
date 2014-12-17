@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface ApiKeyManagementService {
 
-    ApiKey create();
+    ApiKey create(String username);
 
     List<ApiKey> list();
 

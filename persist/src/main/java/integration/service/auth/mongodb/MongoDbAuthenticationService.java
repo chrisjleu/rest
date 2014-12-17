@@ -1,6 +1,7 @@
 package integration.service.auth.mongodb;
 
 import integration.api.model.PropertyValuePair;
+import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
@@ -55,6 +56,12 @@ public class MongoDbAuthenticationService implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         // TODO Authenticate with either basic or oAuth authentication
+        return null;
+    }
+
+    @Override
+    public ApiToken authenticateForToken(AuthenticationRequest request) {
+        // TODO Auto-generated method stub
         return null;
     }
 

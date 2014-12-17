@@ -2,9 +2,12 @@ package core.service;
 
 import integration.api.model.Error;
 import integration.api.model.InsertResult;
+import integration.api.model.apikey.ApiKey;
+import integration.api.model.apikey.ApiToken;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
+import integration.service.auth.ApiKeyManagementService;
 import integration.service.auth.AuthenticationService;
 import integration.service.auth.RegistrationService;
 
@@ -14,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import core.model.AccessKey;
 import core.model.Token;
 import core.model.User;
 import core.model.request.AuthenticationRequest;
@@ -30,21 +34,57 @@ public class UserService {
 
     private final RegistrationService registrationService;
 
+    private final ApiKeyManagementService apiKeyManagementService;
+
     @Inject
-    public UserService(AuthenticationService authenticationService, RegistrationService registrationService) {
+    public UserService(AuthenticationService authenticationService, RegistrationService registrationService,
+            ApiKeyManagementService apiKeyManagementService) {
         this.authService = authenticationService;
         this.registrationService = registrationService;
+        this.apiKeyManagementService = apiKeyManagementService;
     }
 
-    public Token requestToken(String username, String password) {
-        // TODO connect to real service
+    /**
+     * In some authentication mechanisms, an "Access key" or "API key" can be issued to developers that want to use an
+     * API that requires authentication. Rather than use their own username and password, they essentially request the
+     * API owners to generate a username and password (called a key and secret just to be different) for them and use
+     * this instead.
+     * 
+     * More reasons to use API keys: https://stormpath.com/blog/top-six-reasons-use-api-keys-and-how/
+     * 
+     * This method should only be used to generate keys for an already authenticated user (i.e. a developer that has
+     * logged in to the site already through some other authentication mechanism).
+     * 
+     * @param username
+     *            The username of the user to generate an access key for.
+     * @return
+     */
+    public AccessKey createAccessKey(String username) {
+        ApiKey apiKey = apiKeyManagementService.create(username);
+        AccessKey.Status accessKeyStatus = AccessKey.Status.DISABLED;
+        if (apiKey.getStatus() == ApiKey.Status.ENABLED) {
+            accessKeyStatus = AccessKey.Status.ENABLED;
+        }
+        return new AccessKey(apiKey.getId(), apiKey.getSecret(), accessKeyStatus);
+    }
+
+    /**
+     * This is an authentication that gives back a token that is intended to be used in subsequent requests to an API.
+     * 
+     * @param request
+     * @return
+     */
+    public Token requestToken(AuthenticationRequest request) {
+        ApiToken apiToken = authService.authenticateForToken(buildAuthenticationRequest(request));
+
         Token token = new Token();
-        token.setAccessToken("DUMMY-TOKEN:DSFJH84KJSHR98JKHRKH89HKJNEOIER89435");
-        token.setExpiresIn("3600");
-        token.setTokenType("bearer");        
+        token.setAccessToken(apiToken.getAccessToken());
+        token.setExpiresIn(apiToken.getExpiresIn());
+        token.setTokenType(apiToken.getTokenType());
+
         return token;
     }
-    
+
     public User authenticate(AuthenticationRequest request) {
 
         AuthenticationResponse result = authService.authenticate(buildAuthenticationRequest(request));
