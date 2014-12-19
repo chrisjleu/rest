@@ -1,9 +1,9 @@
 package integration.service.auth.stormpath;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.stormpath.sdk.application.Application;
 import com.stormpath.sdk.application.ApplicationCriteria;
@@ -13,6 +13,8 @@ import com.stormpath.sdk.client.Client;
 
 public abstract class AbstractStormpathService {
 
+    private final Logger logger = LoggerFactory.getLogger(AbstractStormpathService.class);
+
     private final StormpathClientFactory clientFactory;
 
     private final String applicationName;
@@ -21,8 +23,7 @@ public abstract class AbstractStormpathService {
 
     private Application application;
 
-    @Inject
-    AbstractStormpathService(StormpathClientFactory factory, @Value("${application.name}") String applicationName) {
+    AbstractStormpathService(StormpathClientFactory factory, String applicationName) {
         this.clientFactory = factory;
         this.applicationName = applicationName;
     }
@@ -35,6 +36,8 @@ public abstract class AbstractStormpathService {
         ApplicationCriteria query = Applications.where(Applications.name().eqIgnoreCase(applicationName));
         ApplicationList applications = client.getApplications(query);
         application = applications.iterator().next();
+        
+        logger.info("Stormpath application for {} is \"{}\"", this.getClass().getName(), application.getName());
     }
 
     protected Application getApplication() {

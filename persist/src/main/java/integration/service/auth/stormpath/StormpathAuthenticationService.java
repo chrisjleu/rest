@@ -6,10 +6,15 @@ import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
 import integration.service.auth.AuthenticationService;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
+import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
@@ -28,7 +33,9 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
 
     Logger logger = LoggerFactory.getLogger(StormpathAuthenticationService.class);
 
-    public StormpathAuthenticationService(StormpathClientFactory factory, String applicationName) {
+    @Inject
+    public StormpathAuthenticationService(StormpathClientFactory factory,
+            @Value("${application.name}") String applicationName) {
         super(factory, applicationName);
     }
 
@@ -76,19 +83,72 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
     }
 
     @Override
-    public ApiToken authenticateForToken(AuthenticationRequest request) {
-        AccessTokenResult result = (AccessTokenResult) getApplication().authenticateOauthRequest(request).execute();
-        
+    public ApiToken authenticateForToken(String accessKey, String secret) {
+
+        HttpRequest tokenRequest = buildHttpRequest(accessKey, secret);
+
+        // This makes the request to Stormpath to get the API access (bearer) token
+        // TODO the TTL should be configurable
+        AccessTokenResult result = (AccessTokenResult) getApplication().authenticateOauthRequest(tokenRequest)
+                .withTtl(3600).execute();
+
         TokenResponse token = result.getTokenResponse();
-        
+
         ApiToken apiToken = new ApiToken();
         apiToken.setAccessToken(token.getAccessToken());
         apiToken.setExpiresIn(token.getExpiresIn());
         apiToken.setTokenType(token.getTokenType());
         apiToken.setRefreshToken(token.getRefreshToken());
         apiToken.setScope(token.getScope());
-        
+
         return apiToken;
+    }
+
+    HttpRequest buildHttpRequest(String accessKey, String secret) {
+        Map<String, String[]> headers = new HashMap<String, String[]>();
+
+        // These two HTTP headers are mandatory (for Stormpath)
+        // Authorization header
+        String encodedSecretAndKey = toAuthorizationHttpHeaderFormat(accessKey, secret);
+        String[] authHeaderValue = { "Basic ".concat(encodedSecretAndKey) };
+        headers.put("Authorization", authHeaderValue);
+
+        // Content-Type header
+        String[] contentTypeHeaderValue = { "application/x-www-form-urlencoded" };
+        headers.put("Content-Type", contentTypeHeaderValue);
+
+        // Mandatory parameters that can come from the request body (usually)
+        // TODO for now, it's not necessary to support different scopes or grant types
+        Map<String, String[]> parameters = new HashMap<String, String[]>();
+        String[] grantTypeValue = { "client_credentials" };
+        parameters.put("grant_type", grantTypeValue);
+
+        String[] scopeArray = { null };
+        parameters.put("scope", scopeArray);
+
+        return HttpRequests.method(HttpMethod.POST).headers(headers).parameters(parameters).build();
+    }
+
+    /**
+     * Encodes the access key and secret to the format:
+     * 
+     * <pre>
+     * Basic RjJTS0haQVI0SVVDVUNIQkw1M0xLR0FZWDpOYm10enNaZkpIWkxYRjhzT0ZGckNDRnNxNXpCYW1xaC9GSFNtWVpJcUlN
+     * </pre>
+     * 
+     * Basic is the prefix required for Basic Authorization and the long string is the base64 encoded String:
+     * <code>key:secret</code>.
+     * 
+     * @param accessKey
+     *            The API key
+     * @param secret
+     *            The secret.
+     * @return HTTP Basic authentication header format.
+     */
+    String toAuthorizationHttpHeaderFormat(String accessKey, String secret) {
+        byte[] unencodedkeyAndSecret = accessKey.concat(":").concat(secret).getBytes();
+        String base64EncodedKeyAndSecret = DatatypeConverter.printBase64Binary(unencodedkeyAndSecret);
+        return "Basic ".concat(base64EncodedKeyAndSecret);
     }
 
     /**

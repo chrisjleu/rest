@@ -85,5 +85,9 @@ logging:
     # persist module classes to DEBUG.
     "integration.service.auth": DEBUG
     "integration.repository.mongo": DEBUG
+    
     # Turn on to debug why your Spring property is not discovered
-    # "org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG
+    #"org.springframework.core.env.PropertySourcesPropertyResolver": DEBUG
+    
+    # Turn on to debug Stormpath
+    #"com.stormpath.sdk": DEBUG

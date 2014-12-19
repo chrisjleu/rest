@@ -5,23 +5,19 @@ import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
 import integration.service.auth.RegistrationService;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
-import com.stormpath.sdk.application.Application;
-import com.stormpath.sdk.application.ApplicationList;
-import com.stormpath.sdk.application.Applications;
-import com.stormpath.sdk.client.Client;
 import com.stormpath.sdk.directory.CustomData;
 
 @Service
 public class StormpathRegistrationService extends AbstractStormpathService implements RegistrationService {
 
-    StormpathRegistrationService(StormpathClientFactory factory, String applicationName) {
+    @Inject
+    StormpathRegistrationService(StormpathClientFactory factory, @Value("${application.name}") String applicationName) {
         super(factory, applicationName);
     }
 

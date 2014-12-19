@@ -74,8 +74,8 @@ public class UserService {
      * @param request
      * @return
      */
-    public Token requestToken(AuthenticationRequest request) {
-        ApiToken apiToken = authService.authenticateForToken(buildAuthenticationRequest(request));
+    public Token requestToken(String accessKey, String secret) {
+        ApiToken apiToken = authService.authenticateForToken(accessKey, secret);
 
         Token token = new Token();
         token.setAccessToken(apiToken.getAccessToken());

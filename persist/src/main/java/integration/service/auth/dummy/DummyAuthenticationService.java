@@ -59,7 +59,7 @@ public class DummyAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public ApiToken authenticateForToken(AuthenticationRequest request) {
+    public ApiToken authenticateForToken(String accessKey, String secret) {
         ApiToken token = new ApiToken();
         token.setAccessToken("DUMMY-TOKEN:DSK434jnke894jskjlkhjf98s");
         token.setTokenType("bearer");

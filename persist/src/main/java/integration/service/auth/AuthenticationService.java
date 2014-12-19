@@ -29,12 +29,13 @@ public interface AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request);
 
     /**
-     * Authenticates a user and a token is returned in exchange for the login credentials (i.e. the username and
-     * password).
+     * Authenticates a user and a token is returned in exchange for the login credentials (i.e. the access key and
+     * secret). An access key and secret obviously must have been obtained prior to this by some other means.
      * 
-     * @param request
+     * @param accessKey
+     * @param secret
      * @return
      */
-    public ApiToken authenticateForToken(AuthenticationRequest request);
+    public ApiToken authenticateForToken(String accessKey, String secret);
 
 }

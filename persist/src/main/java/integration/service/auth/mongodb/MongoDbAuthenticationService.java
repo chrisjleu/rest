@@ -60,7 +60,7 @@ public class MongoDbAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public ApiToken authenticateForToken(AuthenticationRequest request) {
+    public ApiToken authenticateForToken(String accessKey, String secret) {
         // TODO Auto-generated method stub
         return null;
     }

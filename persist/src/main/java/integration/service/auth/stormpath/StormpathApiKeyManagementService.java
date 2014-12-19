@@ -5,6 +5,9 @@ import integration.service.auth.ApiKeyManagementService;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
@@ -16,9 +19,10 @@ import com.stormpath.sdk.api.ApiKeyStatus;
 @Service
 public class StormpathApiKeyManagementService extends AbstractStormpathService implements ApiKeyManagementService {
 
-    public StormpathApiKeyManagementService(StormpathClientFactory factory, String applicationName) {
+    @Inject
+    public StormpathApiKeyManagementService(StormpathClientFactory factory,
+            @Value("${application.name}") String applicationName) {
         super(factory, applicationName);
-
     }
 
     @Override
