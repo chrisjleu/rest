@@ -14,7 +14,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
@@ -29,14 +28,15 @@ import com.stormpath.sdk.oauth.TokenResponse;
 import com.stormpath.sdk.resource.ResourceException;
 
 @Service
-public class StormpathAuthenticationService extends AbstractStormpathService implements AuthenticationService {
+public class StormpathAuthenticationService implements AuthenticationService {
 
-    Logger logger = LoggerFactory.getLogger(StormpathAuthenticationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(StormpathAuthenticationService.class);
+
+    private StormpathClientHelper stormpathClientHelper;
 
     @Inject
-    public StormpathAuthenticationService(StormpathClientFactory factory,
-            @Value("${application.name}") String applicationName) {
-        super(factory, applicationName);
+    StormpathAuthenticationService(StormpathClientHelper stormpathClientHelper) {
+        this.stormpathClientHelper = stormpathClientHelper;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
 
         UsernamePasswordRequest request = new UsernamePasswordRequest(username, password);
         try {
-            AuthenticationResult result = getApplication().authenticateAccount(request);
+            AuthenticationResult result = stormpathClientHelper.getApplication().authenticateAccount(request);
             Account account = result.getAccount();
             AccountDao accountDao = new AccountDao(account.getUsername(), "alias");
             accountDao.setId(account.getHref());
@@ -63,11 +63,11 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
         return authenticate(buildHttpRequest(request));
     }
 
-    private AuthenticationResponse authenticate(HttpRequest request) {
+    AuthenticationResponse authenticate(HttpRequest request) {
         AuthenticationResponse response = new AuthenticationResponse();
         try {
-            OauthAuthenticationResult result = (OauthAuthenticationResult) getApplication().authenticateOauthRequest(
-                    request).execute();
+            OauthAuthenticationResult result = (OauthAuthenticationResult) stormpathClientHelper.getApplication()
+                    .authenticateOauthRequest(request).execute();
 
             Account account = result.getAccount();
             AccountDao accountDao = new AccountDao(account.getUsername(), "alias");
@@ -85,32 +85,49 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
     @Override
     public ApiToken authenticateForToken(String accessKey, String secret) {
 
+        logger.debug("Obtaining access token for application {} given key {}",
+                stormpathClientHelper.getApplicationName(), accessKey);
+
         HttpRequest tokenRequest = buildHttpRequest(accessKey, secret);
 
         // This makes the request to Stormpath to get the API access (bearer) token
         // TODO the TTL should be configurable
-        AccessTokenResult result = (AccessTokenResult) getApplication().authenticateOauthRequest(tokenRequest)
-                .withTtl(3600).execute();
+        AccessTokenResult result = (AccessTokenResult) stormpathClientHelper.getApplication()
+                .authenticateOauthRequest(tokenRequest).withTtl(3600).execute();
 
         TokenResponse token = result.getTokenResponse();
 
+        return buildApiToken(token);
+    }
+
+    ApiToken buildApiToken(TokenResponse token) {
         ApiToken apiToken = new ApiToken();
         apiToken.setAccessToken(token.getAccessToken());
         apiToken.setExpiresIn(token.getExpiresIn());
         apiToken.setTokenType(token.getTokenType());
         apiToken.setRefreshToken(token.getRefreshToken());
         apiToken.setScope(token.getScope());
-
         return apiToken;
     }
-
+    
+    /**
+     * Constructs a {@link HttpRequest} that Stormpath needs in order to provide an access token from a given API key
+     * and secret. The Stormpath API also works if you directly give it a <code>HttpServletRequst</code> object but
+     * since that is not accessible from this layer we have effectively just rebuild it here from the input parameters).
+     * 
+     * @param accessKey
+     *            Access/API key that has been obtained by the client a priori.
+     * @param secret
+     *            The secret associated with the API key.
+     * @return A {@link HttpRequest}.
+     */
     HttpRequest buildHttpRequest(String accessKey, String secret) {
         Map<String, String[]> headers = new HashMap<String, String[]>();
 
         // These two HTTP headers are mandatory (for Stormpath)
         // Authorization header
         String encodedSecretAndKey = toAuthorizationHttpHeaderFormat(accessKey, secret);
-        String[] authHeaderValue = { "Basic ".concat(encodedSecretAndKey) };
+        String[] authHeaderValue = { encodedSecretAndKey };
         headers.put("Authorization", authHeaderValue);
 
         // Content-Type header
@@ -136,7 +153,7 @@ public class StormpathAuthenticationService extends AbstractStormpathService imp
      * Basic RjJTS0haQVI0SVVDVUNIQkw1M0xLR0FZWDpOYm10enNaZkpIWkxYRjhzT0ZGckNDRnNxNXpCYW1xaC9GSFNtWVpJcUlN
      * </pre>
      * 
-     * Basic is the prefix required for Basic Authorization and the long string is the base64 encoded String:
+     * "Basic" is the prefix required for Basic Authorization and the long string is the base64 encoded String:
      * <code>key:secret</code>.
      * 
      * @param accessKey

@@ -40,7 +40,8 @@ public class ErrorMessageBodyWriter implements MessageBodyWriter<ErrorMessage> {
 
         if (!isWritable) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Not matching MessageBodyWriter {}", ErrorMessageBodyWriter.class.getName());
+                logger.debug("Not matching MessageBodyWriter {} with error message type {}",
+                        ErrorMessageBodyWriter.class.getName(), type.getName());
             }
         }
 

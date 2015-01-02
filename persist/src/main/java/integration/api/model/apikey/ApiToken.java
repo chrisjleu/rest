@@ -15,6 +15,4 @@ public class ApiToken {
 
     private String scope;
 
-    private String applicationHref;
-
 }

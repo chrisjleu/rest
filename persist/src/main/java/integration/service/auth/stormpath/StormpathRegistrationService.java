@@ -7,24 +7,30 @@ import integration.service.auth.RegistrationService;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
 import com.stormpath.sdk.directory.CustomData;
 
 @Service
-public class StormpathRegistrationService extends AbstractStormpathService implements RegistrationService {
+public class StormpathRegistrationService implements RegistrationService {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(StormpathRegistrationService.class);
+
+    private StormpathClientHelper stormpathClientHelper;
 
     @Inject
-    StormpathRegistrationService(StormpathClientFactory factory, @Value("${application.name}") String applicationName) {
-        super(factory, applicationName);
+    StormpathRegistrationService(StormpathClientHelper stormpathClientHelper) {
+        this.stormpathClientHelper = stormpathClientHelper;
     }
 
     @Override
     public InsertResult<AccountDao> register(NewUserRegistrationRequest request) {
         // Create the account object
-        Account account = getClient().instantiate(Account.class);
+        Account account = stormpathClientHelper.getClient().instantiate(Account.class);
 
         // Set the account properties
         account.setUsername(request.getUsername()); // optional, defaults to email if unset
@@ -36,9 +42,12 @@ public class StormpathRegistrationService extends AbstractStormpathService imple
         customData.put("alias", request.getAlias());
 
         // Create the account using the existing Application object
-        account = getApplication().createAccount(account);
+        account = stormpathClientHelper.getApplication().createAccount(account);
 
         AccountDao accountDao = toAccountDao(account);
+        
+        logger.debug("Created account {}", accountDao);
+        
         InsertResult<AccountDao> result = new InsertResult<AccountDao>(accountDao);
         return result;
     }

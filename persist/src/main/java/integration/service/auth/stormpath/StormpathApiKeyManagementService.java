@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stormpath.sdk.account.Account;
@@ -17,18 +16,19 @@ import com.stormpath.sdk.account.Accounts;
 import com.stormpath.sdk.api.ApiKeyStatus;
 
 @Service
-public class StormpathApiKeyManagementService extends AbstractStormpathService implements ApiKeyManagementService {
+public class StormpathApiKeyManagementService implements ApiKeyManagementService {
+
+    private StormpathClientHelper stormpathClientHelper;
 
     @Inject
-    public StormpathApiKeyManagementService(StormpathClientFactory factory,
-            @Value("${application.name}") String applicationName) {
-        super(factory, applicationName);
+    public StormpathApiKeyManagementService(StormpathClientHelper stormpathClientHelper) {
+        this.stormpathClientHelper = stormpathClientHelper;
     }
 
     @Override
     public ApiKey create(String username) {
         AccountCriteria criteria = Accounts.where(Accounts.username().eqIgnoreCase(username));
-        AccountList accounts = getApplication().getAccounts(criteria);
+        AccountList accounts = stormpathClientHelper.getApplication().getAccounts(criteria);
 
         if (accounts == null) {
             return null;
