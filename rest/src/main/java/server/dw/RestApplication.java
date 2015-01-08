@@ -1,8 +1,10 @@
 package server.dw;
 
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.CachingAuthenticator;
-import io.dropwizard.auth.basic.BasicAuthProvider;
+import io.dropwizard.auth.ChainedAuthFactory;
+import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.auth.basic.BasicCredentials;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -14,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import server.dw.auth.BasicAuthAuthenticator;
-import server.dw.auth.OAuth2Provider;
-import server.dw.auth.UserOauth2Authenticator;
+import server.dw.auth.OAuth2Factory;
+import server.dw.auth.Oauth2Authenticator;
 import server.dw.config.env.EnvironmentVariableInterpolationBundle;
 import server.dw.jee.servlet.CacheFlushStatsServlet;
 import server.dw.resource.AuthenticationResource;
@@ -23,7 +25,6 @@ import server.dw.resource.ErrorMessageBodyWriter;
 import server.dw.resource.MessageResource;
 import server.dw.resource.OauthTokenResource;
 import server.dw.task.ClearCachingAuthenticatorTask;
-import api.representations.TokenResponse;
 import api.representations.User;
 
 import com.google.common.cache.CacheBuilderSpec;
@@ -98,21 +99,21 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // **************************************** //
         // ************ Authenticators ************ //
         // **************************************** //
-        // A number of dependencies must be obtained in order to build the Authenticator
+        // Basic Auth Authenticator
         BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator(userService);
         CacheBuilderSpec cachePolicy = configuration.getAuthenticationCachePolicy().buildPolicy();
-
-        // Create an authenticator to provide basic authentication
-        CachingAuthenticator<BasicCredentials, TokenResponse> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, TokenResponse>(
+        CachingAuthenticator<BasicCredentials, User> cachingAuthenticator = new CachingAuthenticator<BasicCredentials, User>(
                 environment.metrics(), basicAuthAuthenticator, cachePolicy);
-        BasicAuthProvider<TokenResponse> basicAuthProvider = new BasicAuthProvider<TokenResponse>(cachingAuthenticator,
-                environment.getName());
+        BasicAuthFactory<User> basicAuthFactory = new BasicAuthFactory<User>(cachingAuthenticator,
+                environment.getName(), User.class);
 
-        environment.jersey().register(basicAuthProvider);
+        // Oauth2 Authenticator
+        Oauth2Authenticator userOauth2Authenticator = new Oauth2Authenticator(userService);
+        OAuth2Factory<User> oAuthFactory = new OAuth2Factory<User>(userOauth2Authenticator, environment.getName(),
+                User.class);
 
-        // This registers an Oauth2 provider
-        environment.jersey().register(
-                new OAuth2Provider<User>(new UserOauth2Authenticator(userService), environment.getName()));
+        environment.jersey().register(AuthFactory.binder(addFactoriesToChain(basicAuthFactory, oAuthFactory)));
+
         // ************************************* //
         // ************ JEE Filters ************ //
         // ************************************* //
@@ -127,13 +128,20 @@ public class RestApplication extends Application<RestApplicationConfiguration> {
         // LOGIN SECURITY
         environment.admin().setSecurityHandler(configuration.admin().getAdminSecurityProvider().instance());
 
-        // TASKS:
+        // DROPWIZARD TASKS:
         environment.admin().addTask(new ClearCachingAuthenticatorTask(cachingAuthenticator));
 
         // CUSTOM SERVLETS
         ServletRegistration.Dynamic servlet = environment.admin().addServlet("CacheFlushStatsServlet",
                 new CacheFlushStatsServlet(cachingAuthenticator));
         servlet.addMapping("/cache");
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private ChainedAuthFactory<User> addFactoriesToChain(BasicAuthFactory<User> basicAuthFactory,
+            OAuth2Factory<User> oAuthFactory) {
+        return new ChainedAuthFactory<User>(basicAuthFactory, oAuthFactory);
     }
 
 }

@@ -18,13 +18,15 @@ public class User {
     @Email
     private final String email;
 
+    private TokenResponse token;
+    
     @JsonCreator
     public User(@JsonProperty("email") String email, @JsonProperty("alias") String alias) {
         this.email = email;
         this.alias = alias;
     }
 
-    // TODO not sure if the two methods below should be in this class...
+    // TODO not sure if the method below should be in this class...
 
     public static User fromModel(core.model.User user) {
         return new User(user.getEmail(), user.getAlias());

@@ -6,6 +6,7 @@ import integration.api.model.apikey.ApiKey;
 import integration.api.model.apikey.ApiToken;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
+import integration.api.model.user.auth.OauthTokenResponse;
 import integration.api.model.user.reg.NewUserRegistrationRequest;
 import integration.service.auth.ApiKeyManagementService;
 import integration.service.auth.AuthenticationService;
@@ -21,6 +22,7 @@ import core.model.AccessKey;
 import core.model.Token;
 import core.model.User;
 import core.model.request.AuthenticationRequest;
+import core.model.response.ApiTokenResponse;
 
 /**
  * Handles all operations related to users.
@@ -74,15 +76,22 @@ public class UserService {
      * @param request
      * @return
      */
-    public Token requestToken(String accessKey, String secret) {
-        ApiToken apiToken = authService.authenticateForToken(accessKey, secret);
+    public ApiTokenResponse requestToken(String accessKey, String secret) {
+        OauthTokenResponse response = authService.authenticateForToken(accessKey, secret);
 
         Token token = new Token();
-        token.setAccessToken(apiToken.getAccessToken());
-        token.setExpiresIn(apiToken.getExpiresIn());
-        token.setTokenType(apiToken.getTokenType());
+        token.setAccessToken(response.getApiToken().getAccessToken());
+        token.setExpiresIn(response.getApiToken().getExpiresIn());
+        token.setTokenType(response.getApiToken().getTokenType());
 
-        return token;
+        User user = new User(response.getAccount().getId(), response.getAccount().getEmail(), response.getAccount()
+                .getAlias());
+        
+        ApiTokenResponse apiTokenResponse = new ApiTokenResponse();
+        apiTokenResponse.setToken(token);
+        apiTokenResponse.setUser(user);
+        
+        return apiTokenResponse;
     }
 
     public User authenticate(AuthenticationRequest request) {

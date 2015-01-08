@@ -4,6 +4,7 @@ import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
+import integration.api.model.user.auth.OauthTokenResponse;
 import integration.service.auth.AuthenticationService;
 
 import java.util.UUID;
@@ -59,11 +60,18 @@ public class DummyAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public ApiToken authenticateForToken(String accessKey, String secret) {
+    public OauthTokenResponse authenticateForToken(String accessKey, String secret) {
         ApiToken token = new ApiToken();
         token.setAccessToken("DUMMY-TOKEN:DSK434jnke894jskjlkhjf98s");
         token.setTokenType("bearer");
         token.setExpiresIn("3600");
-        return token;
+        
+        AccountDao accountDao = new AccountDao("Username", "random-alias");
+        
+        OauthTokenResponse oauthTokenResponse = new OauthTokenResponse();
+        oauthTokenResponse.setApiToken(token);
+        oauthTokenResponse.setAccount(accountDao);
+        
+        return oauthTokenResponse;
     }
 }

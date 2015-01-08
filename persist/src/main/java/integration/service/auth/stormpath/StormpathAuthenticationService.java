@@ -4,6 +4,7 @@ import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
+import integration.api.model.user.auth.OauthTokenResponse;
 import integration.service.auth.AuthenticationService;
 
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class StormpathAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public ApiToken authenticateForToken(String accessKey, String secret) {
+    public OauthTokenResponse authenticateForToken(String accessKey, String secret) {
 
         logger.debug("Obtaining access token for application {} given key {}",
                 stormpathClientHelper.getApplicationName(), accessKey);
@@ -95,11 +96,16 @@ public class StormpathAuthenticationService implements AuthenticationService {
         AccessTokenResult result = (AccessTokenResult) stormpathClientHelper.getApplication()
                 .authenticateOauthRequest(tokenRequest).withTtl(3600).execute();
 
-        TokenResponse token = result.getTokenResponse();
-
-        return buildApiToken(token);
+        return buildOauthTokenResponse(result.getTokenResponse(), result.getAccount());
     }
 
+    OauthTokenResponse buildOauthTokenResponse(TokenResponse token, Account account) {
+        OauthTokenResponse oauthTokenResponse = new OauthTokenResponse();
+        oauthTokenResponse.setAccount(buildAccountDao(account));
+        oauthTokenResponse.setApiToken(buildApiToken(token));
+        return oauthTokenResponse;
+    }
+    
     ApiToken buildApiToken(TokenResponse token) {
         ApiToken apiToken = new ApiToken();
         apiToken.setAccessToken(token.getAccessToken());
@@ -108,6 +114,10 @@ public class StormpathAuthenticationService implements AuthenticationService {
         apiToken.setRefreshToken(token.getRefreshToken());
         apiToken.setScope(token.getScope());
         return apiToken;
+    }
+    
+    AccountDao buildAccountDao(Account account) {
+        return new AccountDao(account.getUsername(), (String) account.getCustomData().get("alias"));
     }
     
     /**

@@ -12,13 +12,18 @@ import com.google.common.base.Optional;
 
 import core.service.UserService;
 
-public class UserOauth2Authenticator implements Authenticator<AuthenticationRequest, User> {
+/**
+ * An {@link Authenticator} that returns a {@link User} principal.
+ * 
+ * @see OAuth2Factory
+ */
+public class Oauth2Authenticator implements Authenticator<AuthenticationRequest, User> {
 
-    Logger logger = LoggerFactory.getLogger(UserOauth2Authenticator.class);
+    Logger logger = LoggerFactory.getLogger(Oauth2Authenticator.class);
 
     private final UserService userService;
 
-    public UserOauth2Authenticator(UserService userService) {
+    public Oauth2Authenticator(UserService userService) {
         this.userService = userService;
     }
 

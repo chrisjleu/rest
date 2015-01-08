@@ -11,6 +11,8 @@ public class AuthenticationRequest {
 
     private final Map<String, String[]> httpRequestHeaders;
 
+    private Map<String, String[]> queryParams; // TODO should add this to constructor
+
     private final String httpQueryString;
 
     public AuthenticationRequest(String httpRequestMethod, Map<String, String[]> httpRequestHeaders,

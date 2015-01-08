@@ -11,7 +11,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<dropwizard.version>0.7.1</dropwizard.version>
+		<dropwizard.version>0.8.0-rc1</dropwizard.version>
 	</properties>
 
 	<dependencies>
@@ -37,6 +37,13 @@
 			<groupId>experiment.rest</groupId>
 			<artifactId>core</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Utilities -->
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
 		</dependency>
 
 	</dependencies>

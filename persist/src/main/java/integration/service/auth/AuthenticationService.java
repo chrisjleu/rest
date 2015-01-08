@@ -1,8 +1,8 @@
 package integration.service.auth;
 
-import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AuthenticationResponse;
+import integration.api.model.user.auth.OauthTokenResponse;
 
 /**
  * Provides services around user authentication.
@@ -36,6 +36,6 @@ public interface AuthenticationService {
      * @param secret
      * @return
      */
-    public ApiToken authenticateForToken(String accessKey, String secret);
+    public OauthTokenResponse authenticateForToken(String accessKey, String secret);
 
 }

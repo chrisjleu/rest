@@ -91,3 +91,7 @@ logging:
     
     # Turn on to debug Stormpath
     #"com.stormpath.sdk": DEBUG
+    
+    # See a list of resources and providers known to DW
+    "io.dropwizard.jersey": DEBUG
+    

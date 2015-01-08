@@ -5,6 +5,7 @@ import integration.api.model.apikey.ApiToken;
 import integration.api.model.apikey.AuthenticationRequest;
 import integration.api.model.user.auth.AccountDao;
 import integration.api.model.user.auth.AuthenticationResponse;
+import integration.api.model.user.auth.OauthTokenResponse;
 import integration.api.repository.Repository;
 import integration.service.auth.AuthenticationService;
 
@@ -60,7 +61,7 @@ public class MongoDbAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public ApiToken authenticateForToken(String accessKey, String secret) {
+    public OauthTokenResponse authenticateForToken(String accessKey, String secret) {
         // TODO Auto-generated method stub
         return null;
     }

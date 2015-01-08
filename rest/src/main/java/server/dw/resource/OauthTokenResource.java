@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import api.representations.TokenResponse;
+import api.representations.User;
 
 /**
  * <p>
@@ -47,8 +48,8 @@ import api.representations.TokenResponse;
  * </p>
  */
 @Path("/oauth")
-@Produces({ MediaType.APPLICATION_JSON })
 @Consumes(value = MediaType.APPLICATION_FORM_URLENCODED)
+@Produces({ MediaType.APPLICATION_JSON })
 public class OauthTokenResource {
 
     Logger logger = LoggerFactory.getLogger(OauthTokenResource.class);
@@ -59,7 +60,7 @@ public class OauthTokenResource {
      * password) for an access token. The access token is used to make subsequent requests to the "resource server".
      * 
      * <pre>
-     * curl -L -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "X-Forwarded-Proto: https" -d 'grant_type=client_credentials' -u "8GR88GDIE49UOGFP0R3LQOEB1:pqTa17hVs+rNiIxi/VIxqzHKpKSVbtdcgfy5JOaUDa9" http://localhost:8080/oauth/token
+     * curl -i -L -X POST -H "Content-Type: application/x-www-form-urlencoded" -H "X-Forwarded-Proto: https" -d 'grant_type=client_credentials' -u "8GR88GDIE49UOGFP0R3LQOEB1:pqTa17hVs+rNiIxi/VIxqzHKpKSVbtdcgfy5JOaUDa9" http://localhost:8080/oauth/token
      * </pre>
      * 
      * </p>
@@ -75,6 +76,7 @@ public class OauthTokenResource {
      *    "token_type":"bearer",
      *    "expires_in":3600
      * }
+     * 
      * </pre>
      * 
      * </p>
@@ -84,9 +86,9 @@ public class OauthTokenResource {
      */
     @POST
     @Path("/token")
-    public TokenResponse exchangeForToken(@Auth TokenResponse tokenResponse) {
-        logger.debug("TokenResponse {} granted", tokenResponse);
-        return tokenResponse;
+    public TokenResponse exchangeForToken(@Auth User user) {
+        logger.debug("TokenResponse {} granted", user.getToken());
+        return user.getToken();
     }
 
 }
