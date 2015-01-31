@@ -57,6 +57,7 @@ public class MessageResource {
     @Timed
     @Path("/count")
     public long count() {
+        logger.debug("Request for count received");
         return messageService.count();
     }
 
@@ -102,6 +103,6 @@ public class MessageResource {
     public Response dropCollection() {
         messageService.dropAll();
         return Response.noContent().build();
-    }
+    } 
 
 }
